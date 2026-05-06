@@ -111,38 +111,6 @@ CURLDIR=/path/to/curl-prefix rake build:toolchain
 CURLDIR=/path/to/curl-prefix rake "build:static:binary[repl.rb,repl]"
 ```
 
-## Build
-
-This project is an [`mrbgem`](https://mruby.org/docs/guides/mrbgems.html).
-
-The simplest build flow from this repo is:
-
-```sh
-rake build:toolchain
-```
-
-That task expects an mruby checkout at `../mruby` by default. To use a
-different checkout:
-
-```sh
-MRUBY_DIR=/path/to/mruby rake build:toolchain
-```
-
-These tasks run through the host Ruby, build mruby with
-[build_config/mruby-llm.rb](build_config/mruby-llm.rb), and copy the built
-mruby toolchain into `bin/`.
-
-The equivalent direct `minirake` flow is:
-
-```sh
-cd /path/to/mruby
-ruby minirake clean
-ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb
-```
-
-On FreeBSD-like systems, the build config already adds `/usr/local/include` and
-`/usr/local/lib` for `libcurl`.
-
 ## Test
 
 The standard flow is:
@@ -176,21 +144,6 @@ The mruby build uses:
 
 See [mrbgem.rake](mrbgem.rake) and
 [build_config/mruby-llm.rb](build_config/mruby-llm.rb).
-
-## Agent
-
-[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) is available
-as the higher-level wrapper over
-[`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html).
-
-It supports:
-
-- class-level defaults for `model`, `tools`, `skills`, `schema`, and `instructions`
-- automatic tool-loop execution during `talk` and `respond`
-- context persistence through the wrapped context
-
-In mruby, agent tool execution currently runs through the supported `:call`
-strategy.
 
 ## License
 

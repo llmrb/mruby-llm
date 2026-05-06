@@ -34,101 +34,48 @@ tools, skills, MCP, streaming, schemas, files, and persistence.
 - MCP over HTTP
 - MCP tools inside [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
 
-## Binaries
+## Integration
 
-To produce a real native executable from a Ruby entrypoint, use the binary
-tasks. You can find [repl.rb](repl.rb) in the repository as a working example.
+`mruby-llm` is an [`mrbgem`](https://mruby.org/docs/guides/mrbgems.html).
 
-### Dynamic
+Add it to your own mruby build config. A typical consumer build looks like:
 
-For a dynamically linked executable:
+```ruby
+MRuby::Build.new("app") do |conf|
+  conf.toolchain
+  conf.gembox "default"
+  conf.enable_debug
 
-```sh
-rake "build:dynamic:binary[repl.rb,repl]"
+  conf.cc.include_paths << "/usr/local/include"
+  conf.linker.library_paths << "/usr/local/lib"
+
+  conf.gem "/absolute/path/to/mruby-llm"
+
+  conf.enable_bintest
+  conf.enable_test
+end
 ```
 
-The dynamic task:
-
-- compiles the input Ruby file to embedded mruby bytecode with `mrbc`
-- generates a small C entrypoint
-- links a native executable against the built mruby libraries
-- writes the result to `bin/<output>`
-
-Examples:
+Then build through your mruby checkout:
 
 ```sh
-rake "build:dynamic:binary[repl.rb,repl]"
-DEEPSEEK_SECRET=... bin/repl
+ruby minirake MRUBY_CONFIG=/absolute/path/to/build_config.rb
 ```
 
-```sh
-rake "build:dynamic:binary[foo.rb,foo]"
-bin/foo
-```
+`mruby-llm` pulls in its own mrbgem dependencies through
+[mrbgem.rake](mrbgem.rake), so the consumer build config only needs to:
 
-To build against a specific curl install, set `CURLDIR`:
+- choose the mruby toolchain
+- set any include and library paths needed for `libcurl`
+- include `mruby-llm`
+- define any application-specific binaries or extra gems
 
-```sh
-CURLDIR=/path/to/curl-prefix rake build:toolchain
-CURLDIR=/path/to/curl-prefix rake "build:dynamic:binary[repl.rb,repl]"
-```
-
-### Static
-
-For a statically linked executable:
-
-```sh
-rake "build:static:binary[repl.rb,repl]"
-```
-
-This adds `-static` at link time and depends on your toolchain and system
-libraries supporting static linking.
-
-To download and build a minimal static curl for mruby-llm:
-
-```sh
-CURLDIR=/path/to/curl-prefix rake build:curl
-```
-
-Override the release or tarball URL if needed:
-
-```sh
-CURL_VERSION=8.19.0 CURLDIR=/path/to/curl-prefix rake build:curl
-CURL_URL=https://curl.se/download/curl-8.19.0.tar.xz CURLDIR=/path/to/curl-prefix rake build:curl
-```
-
-That curl build is intentionally trimmed for mruby-llm's HTTP use case:
-
-- HTTP and HTTPS only
-- OpenSSL TLS
-- no SSH, brotli, PSL, IDN2, HTTP/2, or zstd
-- static library output
-
-After that, point the build at the curl prefix:
-
-```sh
-CURLDIR=/path/to/curl-prefix rake build:toolchain
-CURLDIR=/path/to/curl-prefix rake "build:static:binary[repl.rb,repl]"
-```
-
-## Test
-
-The standard flow is:
-
-1. Build with `rake build:toolchain` or `ruby minirake`.
-2. Run the built `mruby` binary against a small runtime check.
-
-For example:
-
-```sh
-rake build:toolchain
-bin/mruby -e 'p LLM::VERSION'
-bin/mirb
-```
+Consumer projects are expected to own their own build configuration, toolchain
+choices, and executable packaging.
 
 ## Runtime Dependencies
 
-The mruby build uses:
+The gem depends on:
 
 - `mruby-http`
 - `mruby-curl`
@@ -142,8 +89,7 @@ The mruby build uses:
 - `mruby-struct`
 - `mruby-regexp`
 
-See [mrbgem.rake](mrbgem.rake) and
-[build_config/mruby-llm.rb](build_config/mruby-llm.rb).
+See [mrbgem.rake](mrbgem.rake).
 
 ## License
 

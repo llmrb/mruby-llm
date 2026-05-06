@@ -8,28 +8,31 @@
 
 ## About
 
-`mruby-llm` is an mruby runtime based on [llm.rb](https://github.com/llmrb/llm.rb)
-with API docs at [0x1eef.github.io/x/llm.rb](https://0x1eef.github.io/x/llm.rb?rebuild=1).
-
-It keeps the same execution model and most of the same features, adapted for
-mruby. Core runtime features are supported, including providers,
+mruby-llm is a fork of Ruby's most capable AI runtime - [llm.rb](https://github.com/llmrb/llm.rb)
+and it brings the same functionality to mruby. It keeps the same execution model
+and most of the same features but adapted for mruby. Core runtime features are
+supported, including multiple providers,
 [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html),
-[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html), tools,
-skills, MCP, streaming, schemas, files, and persistence.
+[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html),
+tools, skills, MCP, streaming, schemas, files, and persistence.
 
-## Status
+## Features
 
-The runtime supports:
-
-- provider chat
-- [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
-- [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
-- streaming
-- local tool calls
-- context save and restore
+- Multi-provider chat built on the `llm.rb` execution model
+- Stateful conversations with [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+- Higher-level orchestration with [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+- Prompt composition with `LLM::Prompt` and `LLM::Buffer`
+- Structured outputs and schemas with `LLM::Schema`
+- Streaming responses
+- Local tool calling
+- Skills
+- Context transformers
+- Loop guards with `LLM::LoopGuard`
+- Context compaction
+- Save and restore state from disk
 - MCP over stdio
 - MCP over HTTP
-- MCP tools inside `LLM::Context`
+- MCP tools inside [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
 
 ## Build
 

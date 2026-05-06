@@ -1,48 +1,41 @@
 <p align="center">
-  <a href="mruby-llm"><img src="https://github.com/llmrb/llm.rb/raw/main/llm.png" width="200" height="200" border="0" alt="mruby-llm"></a>
+  <a href="https://github.com/llmrb/llm.rb"><img src="https://github.com/llmrb/llm.rb/raw/main/llm.png" width="200" height="200" border="0" alt="mruby-llm"></a>
 </p>
 <p align="center">
   <a href="https://opensource.org/license/0bsd"><img src="https://img.shields.io/badge/License-0BSD-orange.svg?" alt="License"></a>
   <a href="https://github.com/llmrb/llm.rb/tags"><img src="https://img.shields.io/badge/version-8.0.0-green.svg?" alt="Version"></a>
 </p>
 
-# mruby-llm
-
 ## About
 
-`mruby-llm` is an mruby runtime based on [llm.rb](https://github.com/llmrb/llm.rb).
-It keeps the same runtime model and most of the same features, but is designed
-for mruby instead of CRuby.
-<br>
+`mruby-llm` is an mruby runtime based on [llm.rb](https://github.com/llmrb/llm.rb)
+with API docs at [0x1eef.github.io/x/llm.rb](https://0x1eef.github.io/x/llm.rb?rebuild=1).
 
-The goal is not a thin compatibility shim. It is to keep the core
-`llm.rb` runtime available under mruby: providers, `LLM::Context`,
-`LLM::Agent`, tools, skills, MCP, streaming, schemas, files, and persistence.
-
-The runtime surface in this repository lives under `mrblib/`.
+It keeps the same execution model and most of the same features, adapted for
+mruby. Core runtime features are supported, including providers,
+[`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html),
+[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html), tools,
+skills, MCP, streaming, schemas, files, and persistence.
 
 ## Status
 
-The port is past the bootstrapping stage and now keeps all core features of the
-runtime:
+The runtime supports:
 
 - provider chat
-- `LLM::Agent`
-- `LLM::Context`
+- [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
+- [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
 - streaming
 - local tool calls
-- context save/restore
+- context save and restore
 - MCP over stdio
 - MCP over HTTP
 - MCP tools inside `LLM::Context`
 
-The current supported surface is documented in
-[resources/mruby-support.md](resources/mruby-support.md).
-
 ## Build
 
-This project is an `mrbgem`. Build it through an mruby checkout using
-[build_config/mruby-llm.rb](build_config/mruby-llm.rb):
+This project is an
+[`mrbgem`](https://mruby.org/docs/guides/mrbgems.html). Build it through an
+mruby checkout using [build_config/mruby-llm.rb](build_config/mruby-llm.rb):
 
 ```sh
 cd /path/to/mruby
@@ -51,6 +44,23 @@ ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb
 
 On FreeBSD-like systems, the build config already adds `/usr/local/include` and
 `/usr/local/lib` for `libcurl`.
+
+## Test
+
+The standard flow is:
+
+1. Add this gem to an mruby build config.
+2. Build mruby with `minirake`.
+3. Run the built `mruby` binary against a small runtime check.
+
+With the included config:
+
+```sh
+cd /path/to/mruby
+ruby minirake clean
+ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb
+build/mruby-llm/bin/mruby -e 'p LLM::VERSION'
+```
 
 ## Runtime Dependencies
 
@@ -68,20 +78,14 @@ The mruby build uses:
 - `mruby-struct`
 - `mruby-regexp`
 
-See:
-
-- [mrbgem.rake](mrbgem.rake)
-- [build_config/mruby-llm.rb](build_config/mruby-llm.rb)
-
-## Verification
-
-The verified mruby surface is summarized in
-[resources/mruby-support.md](resources/mruby-support.md).
+See [mrbgem.rake](mrbgem.rake) and
+[build_config/mruby-llm.rb](build_config/mruby-llm.rb).
 
 ## Agent
 
-`LLM::Agent` is available in the mruby runtime as the higher-level wrapper over
-`LLM::Context`.
+[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) is available
+as the higher-level wrapper over
+[`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html).
 
 It supports:
 
@@ -90,10 +94,10 @@ It supports:
 - context persistence through the wrapped context
 
 In mruby, agent tool execution currently runs through the supported `:call`
-strategy only.
+strategy.
 
-## Scope
+## License
 
-This project is mruby-first. It does not aim to preserve the CRuby
-standard-library transport model, `net-http-persistent`, or server-tool surface
-inside the mruby runtime.
+[BSD Zero Clause](https://choosealicense.com/licenses/0bsd/)
+<br>
+See [LICENSE](./LICENSE)

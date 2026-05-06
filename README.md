@@ -34,6 +34,34 @@ tools, skills, MCP, streaming, schemas, files, and persistence.
 - MCP over HTTP
 - MCP tools inside [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
 
+## Binaries
+
+To produce a real native executable from a Ruby entrypoint, use
+the following, you can find [repl.rb](repl.rb) in the repository:
+
+```sh
+rake "binary[repl.rb,repl]"
+```
+
+That task:
+
+- compiles the input Ruby file to embedded mruby bytecode with `mrbc`
+- generates a small C entrypoint
+- links a native executable against the built mruby libraries
+- writes the result to `bin/<output>`
+
+Examples:
+
+```sh
+rake "binary[repl.rb,repl]"
+DEEPSEEK_SECRET=... bin/repl
+```
+
+```sh
+rake "binary[foo.rb,foo]"
+bin/foo
+```
+
 ## Build
 
 This project is an [`mrbgem`](https://mruby.org/docs/guides/mrbgems.html).
@@ -65,33 +93,6 @@ ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb
 
 On FreeBSD-like systems, the build config already adds `/usr/local/include` and
 `/usr/local/lib` for `libcurl`.
-
-## How Do I Build An Executable Binary?
-
-To produce a real native executable from a Ruby entrypoint, use:
-
-```sh
-rake "binary[repl.rb,repl]"
-```
-
-That task:
-
-- compiles the input Ruby file to embedded mruby bytecode with `mrbc`
-- generates a small C entrypoint
-- links a native executable against the built mruby libraries
-- writes the result to `bin/<output>`
-
-Examples:
-
-```sh
-rake "binary[repl.rb,repl]"
-DEEPSEEK_SECRET=... bin/repl
-```
-
-```sh
-rake "binary[foo.rb,foo]"
-bin/foo
-```
 
 ## Test
 

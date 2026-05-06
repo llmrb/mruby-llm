@@ -37,10 +37,9 @@ tools, skills, MCP, streaming, schemas, files, and persistence.
 
 ## Example
 
-[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) is where
-the runtime starts to feel bigger than a chat wrapper. An agent can hold
-instructions, carry state, call tools, and keep looping until it has
-finished the task:
+[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) lets you
+define a reusable agent with instructions, tools, and an execution loop
+built in:
 
 ```ruby
 class TravelAgent < LLM::Agent

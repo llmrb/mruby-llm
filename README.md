@@ -51,9 +51,7 @@ end
 llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
 agent = TravelAgent.new(llm)
 
-res = agent.talk(
-  "If Tokyo is warm this Saturday, plan a picnic and put it on my calendar."
-)
+res = agent.talk("If Tokyo is warm this Saturday, plan a picnic and put it on my calendar.")
 puts res.content
 ```
 

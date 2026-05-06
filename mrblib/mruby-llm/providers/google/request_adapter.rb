@@ -4,7 +4,6 @@ class LLM::Google
   ##
   # @private
   module RequestAdapter
-    require_relative "request_adapter/completion"
 
     ##
     # @param [Array<LLM::Message>] messages

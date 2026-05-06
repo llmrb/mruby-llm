@@ -30,20 +30,6 @@
 #    property :address, Address, "Person's address", required: true
 #  end
 class LLM::Schema
-  require_relative "schema/version"
-  require_relative "schema/parser"
-  require_relative "schema/leaf"
-  require_relative "schema/object"
-  require_relative "schema/array"
-  require_relative "schema/all_of"
-  require_relative "schema/any_of"
-  require_relative "schema/one_of"
-  require_relative "schema/string"
-  require_relative "schema/enum"
-  require_relative "schema/number"
-  require_relative "schema/integer"
-  require_relative "schema/boolean"
-  require_relative "schema/null"
 
   @__monitor = Monitor.new
   extend LLM::Schema::Parser

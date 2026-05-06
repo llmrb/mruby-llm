@@ -16,11 +16,6 @@ module LLM
   #   ctx.talk ["Tell me about this image", ctx.local_file("/images/photo.png")]
   #   ctx.messages.select(&:assistant?).each { print "[#{_1.role}]", _1.content, "\n" }
   class Ollama < Provider
-    require_relative "ollama/error_handler"
-    require_relative "ollama/request_adapter"
-    require_relative "ollama/response_adapter"
-    require_relative "ollama/stream_parser"
-    require_relative "ollama/models"
 
     HOST = "localhost"
 

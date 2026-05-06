@@ -4,7 +4,6 @@ class LLM::DeepSeek
   ##
   # @private
   module RequestAdapter
-    require_relative "request_adapter/completion"
     ##
     # @param [Array<LLM::Message>] messages
     #  The messages to adapt

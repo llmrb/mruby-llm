@@ -29,9 +29,6 @@
 #     end
 #   end
 class LLM::Function
-  require_relative "function/registry"
-  require_relative "function/tracing"
-  require_relative "function/array"
 
   extend LLM::Function::Registry
   prepend LLM::Function::Tracing

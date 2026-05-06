@@ -16,7 +16,6 @@ class LLM::OpenAI
     PollError = Class.new(LLM::Error)
 
     INTERVAL = 0.01
-    private_constant :INTERVAL
 
     ##
     # @param [LLM::Provider] provider

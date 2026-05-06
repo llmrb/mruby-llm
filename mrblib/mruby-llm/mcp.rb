@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
 class LLM::MCP
-  require_relative "mcp/error"
-  require_relative "mcp/command"
-  require_relative "mcp/mailbox"
-  require_relative "mcp/router"
-  require_relative "mcp/rpc"
-  require_relative "mcp/transport/http"
-  require_relative "mcp/transport/stdio"
 
   include RPC
 

@@ -14,17 +14,6 @@ module LLM
   #   ctx.talk ["Tell me about this photo", ctx.local_file("/images/photo.png")]
   #   ctx.messages.select(&:assistant?).each { print "[#{_1.role}]", _1.content, "\n" }
   class OpenAI < Provider
-    require_relative "openai/error_handler"
-    require_relative "openai/request_adapter"
-    require_relative "openai/response_adapter"
-    require_relative "openai/stream_parser"
-    require_relative "openai/models"
-    require_relative "openai/responses"
-    require_relative "openai/images"
-    require_relative "openai/audio"
-    require_relative "openai/files"
-    require_relative "openai/moderations"
-    require_relative "openai/vector_stores"
 
     HOST = "api.openai.com"
 

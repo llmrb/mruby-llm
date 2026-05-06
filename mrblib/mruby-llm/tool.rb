@@ -18,7 +18,6 @@
 #     end
 #   end
 class LLM::Tool
-  require_relative "tool/param"
   extend LLM::Tool::Param
   extend LLM::Function::Registry
 

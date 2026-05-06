@@ -34,9 +34,6 @@ module LLM
   #   ctx.talk(prompt)
   #   ctx.messages.each { |m| puts "[#{m.role}] #{m.content}" }
   class Context
-    require_relative "compactor"
-    require_relative "context/serializer"
-    require_relative "context/deserializer"
 
     ZERO_USAGE = LLM::Object.from(
       input_tokens: 0,
@@ -44,7 +41,6 @@ module LLM
       reasoning_tokens: 0,
       total_tokens: 0
     )
-    private_constant :ZERO_USAGE
 
     ##
     # Returns the accumulated message history for this context

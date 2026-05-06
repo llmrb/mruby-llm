@@ -5,8 +5,6 @@
 # similar in spirit to OpenStruct, and it was introduced after OpenStruct
 # became a bundled gem rather than a default gem in Ruby 3.5.
 class LLM::Object < BasicObject
-  require_relative "object/builder"
-  require_relative "object/kernel"
 
   SINGLETON = self
   UNDEFINED = ::Object.new.freeze

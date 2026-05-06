@@ -14,13 +14,6 @@ module LLM
   #   ctx.talk ["Tell me about this photo", ctx.local_file("/images/photo.png")]
   #   ctx.messages.select(&:assistant?).each { print "[#{_1.role}]", _1.content, "\n" }
   class Anthropic < Provider
-    require_relative "anthropic/utils"
-    require_relative "anthropic/error_handler"
-    require_relative "anthropic/request_adapter"
-    require_relative "anthropic/response_adapter"
-    require_relative "anthropic/stream_parser"
-    require_relative "anthropic/models"
-    require_relative "anthropic/files"
     HOST = "api.anthropic.com"
 
     ##

@@ -14,7 +14,6 @@ class LLM::OpenAI
   #   res2 = llm.responses.create "5 + 5 = X ?", role: :user, previous_response_id: res1.id
   #   [res1, res2].each { llm.responses.delete(_1) }
   class Responses
-    require_relative "responses/stream_parser"
     include RequestAdapter
 
     ##

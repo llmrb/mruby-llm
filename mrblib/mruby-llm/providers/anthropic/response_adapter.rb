@@ -4,11 +4,6 @@ class LLM::Anthropic
   ##
   # @private
   module ResponseAdapter
-    require_relative "response_adapter/completion"
-    require_relative "response_adapter/enumerable"
-    require_relative "response_adapter/file"
-    require_relative "response_adapter/models"
-    require_relative "response_adapter/web_search"
 
     module_function
 

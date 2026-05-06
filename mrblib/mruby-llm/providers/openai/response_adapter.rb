@@ -4,16 +4,6 @@ class LLM::OpenAI
   ##
   # @private
   module ResponseAdapter
-    require_relative "response_adapter/audio"
-    require_relative "response_adapter/completion"
-    require_relative "response_adapter/embedding"
-    require_relative "response_adapter/enumerable"
-    require_relative "response_adapter/file"
-    require_relative "response_adapter/image"
-    require_relative "response_adapter/moderations"
-    require_relative "response_adapter/models"
-    require_relative "response_adapter/responds"
-    require_relative "response_adapter/web_search"
 
     ##
     # @param [LLM::Response, Net::HTTPResponse] res

@@ -2,7 +2,6 @@
 
 module LLM::MCP::Transport
   class HTTP
-    require_relative "http/event_handler"
 
     def initialize(url:, headers: {}, timeout: nil)
       @uri = LLM::URI.parse(url)

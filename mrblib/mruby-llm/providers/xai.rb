@@ -13,7 +13,6 @@ module LLM
   #   ctx.talk ["Tell me about this photo", ctx.local_file("/images/photo.png")]
   #   ctx.messages.select(&:assistant?).each { print "[#{_1.role}]", _1.content, "\n" }
   class XAI < OpenAI
-    require_relative "xai/images"
 
     ##
     # @param [String] host A regional host or the default ("api.x.ai")

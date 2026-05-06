@@ -4,9 +4,6 @@ class LLM::Ollama
   ##
   # @private
   module ResponseAdapter
-    require_relative "response_adapter/completion"
-    require_relative "response_adapter/embedding"
-    require_relative "response_adapter/models"
 
     module_function
 

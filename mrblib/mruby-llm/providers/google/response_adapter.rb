@@ -4,13 +4,6 @@ class LLM::Google
   ##
   # @private
   module ResponseAdapter
-    require_relative "response_adapter/completion"
-    require_relative "response_adapter/embedding"
-    require_relative "response_adapter/file"
-    require_relative "response_adapter/files"
-    require_relative "response_adapter/image"
-    require_relative "response_adapter/models"
-    require_relative "response_adapter/web_search"
 
     module_function
 

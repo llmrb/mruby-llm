@@ -30,7 +30,6 @@ module LLM
   #   end
   module Contract
     ContractError = Class.new(LLM::Error)
-    require_relative "contract/completion"
 
     ##
     # @api private

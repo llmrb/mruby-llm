@@ -6,8 +6,6 @@
 #
 # @abstract
 class LLM::Provider
-  require_relative "provider/transport/http"
-  require_relative "provider/transport/http/execution"
 
   ##
   # @param [String, nil] key

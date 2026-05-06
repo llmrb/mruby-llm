@@ -16,7 +16,6 @@ module LLM
   #   ctx.talk "Hello"
   #   ctx.messages.select(&:assistant?).each { print "[#{_1.role}]", _1.content, "\n" }
   class DeepSeek < OpenAI
-    require_relative "deepseek/request_adapter"
 
     ##
     # @param (see LLM::Provider#initialize)

@@ -4,9 +4,6 @@ class LLM::OpenAI
   ##
   # @private
   module RequestAdapter
-    require_relative "request_adapter/completion"
-    require_relative "request_adapter/respond"
-    require_relative "request_adapter/moderation"
 
     ##
     # @param [Array<LLM::Message>] messages

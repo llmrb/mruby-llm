@@ -5,7 +5,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
   spec.description = 'Ruby toolkit for multiple Large Language Models (LLMs)'
 
   spec.rbfiles = %w[
-    mrblib/000-bootstrap.rb
+    mrblib/mruby-llm.rb
     mrblib/mruby-llm/monitor.rb
     mrblib/mruby-llm/yaml.rb
     mrblib/mruby-llm/uri.rb
@@ -157,7 +157,6 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
     mrblib/mruby-llm/tool.rb
     mrblib/mruby-llm/skill.rb
     mrblib/mruby-llm/loop_guard.rb
-    mrblib/mruby-llm.rb
   ].map { File.expand_path(_1, __dir__) }
 
   # Dependencies

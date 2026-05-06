@@ -17,11 +17,6 @@ mruby. Core runtime features are supported, including providers,
 [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html), tools,
 skills, MCP, streaming, schemas, files, and persistence.
 
-The HTTP layer uses `mruby-curl`, and the runtime includes a small
-[`Net::HTTP`](https://ruby-doc.org/stdlib-3.3.0/libdoc/net/http/rdoc/Net/HTTP.html)
-compatibility layer built around curl so the existing provider code can be
-reused under mruby.
-
 ## Status
 
 The runtime supports:

@@ -1,7 +1,7 @@
 MRuby::Gem::Specification.new('mruby-llm') do |spec|
   spec.license = '0BSD'
   spec.authors = '0x1eef'
-  spec.version = '0.1.0'
+  spec.version = '0.1.0.beta'
   spec.description = 'Ruby toolkit for multiple Large Language Models (LLMs)'
 
   spec.rbfiles = %w[

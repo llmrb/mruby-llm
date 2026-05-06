@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "rakelib/mruby-llm/tasks/binary"
+require_relative "build/build"
 
 task default: :help
 
@@ -12,17 +12,32 @@ task :help do
   puts "  ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb"
   puts
   puts "Convenience build from this repo:"
-  puts "  rake build"
-  puts '  rake "binary[repl.rb,repl]"'
-  puts "  MRUBY_DIR=/path/to/mruby rake build"
+  puts "  rake build:toolchain"
+  puts '  rake "build:dynamic:binary[repl.rb,repl]"'
+  puts '  rake "build:static:binary[repl.rb,repl]"'
+  puts "  CURLDIR=/path/to/curl-prefix rake build:curl"
+  puts "  MRUBY_DIR=/path/to/mruby rake build:toolchain"
 end
 
-desc "Build mruby-llm through an mruby checkout and copy binaries into ./bin"
-task :build do
-  LLM::Task::Binary.build_runtime!
+namespace :build do
+  desc "Build mruby-llm through an mruby checkout and copy binaries into ./bin"
+  task :toolchain do
+    Build::Binaries.build_toolchain!
+  end
 end
 
-desc "Build a native executable from input Ruby to bin/output"
-task :binary, [:input, :output] => :build do |_task, args|
-  LLM::Task::Binary.build(input: args[:input] || "repl.rb", output: args[:output])
+namespace :build do
+  namespace :dynamic do
+    desc "Build a dynamically linked native executable from input Ruby to bin/output"
+    task :binary, [:input, :output] => "build:toolchain" do |_task, args|
+      Build::Binaries.build_dynamic(input: args[:input] || "repl.rb", output: args[:output])
+    end
+  end
+
+  namespace :static do
+    desc "Build a statically linked native executable from input Ruby to bin/output"
+    task :binary, [:input, :output] => "build:toolchain" do |_task, args|
+      Build::Binaries.build_static(input: args[:input] || "repl.rb", output: args[:output])
+    end
+  end
 end

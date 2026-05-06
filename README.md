@@ -36,14 +36,18 @@ tools, skills, MCP, streaming, schemas, files, and persistence.
 
 ## Binaries
 
-To produce a real native executable from a Ruby entrypoint, use
-the following, you can find [repl.rb](repl.rb) in the repository:
+To produce a real native executable from a Ruby entrypoint, use the binary
+tasks. You can find [repl.rb](repl.rb) in the repository as a working example.
+
+### Dynamic
+
+For a dynamically linked executable:
 
 ```sh
-rake "binary[repl.rb,repl]"
+rake "build:dynamic:binary[repl.rb,repl]"
 ```
 
-That task:
+The dynamic task:
 
 - compiles the input Ruby file to embedded mruby bytecode with `mrbc`
 - generates a small C entrypoint
@@ -53,13 +57,58 @@ That task:
 Examples:
 
 ```sh
-rake "binary[repl.rb,repl]"
+rake "build:dynamic:binary[repl.rb,repl]"
 DEEPSEEK_SECRET=... bin/repl
 ```
 
 ```sh
-rake "binary[foo.rb,foo]"
+rake "build:dynamic:binary[foo.rb,foo]"
 bin/foo
+```
+
+To build against a specific curl install, set `CURLDIR`:
+
+```sh
+CURLDIR=/path/to/curl-prefix rake build:toolchain
+CURLDIR=/path/to/curl-prefix rake "build:dynamic:binary[repl.rb,repl]"
+```
+
+### Static
+
+For a statically linked executable:
+
+```sh
+rake "build:static:binary[repl.rb,repl]"
+```
+
+This adds `-static` at link time and depends on your toolchain and system
+libraries supporting static linking.
+
+To download and build a minimal static curl for mruby-llm:
+
+```sh
+CURLDIR=/path/to/curl-prefix rake build:curl
+```
+
+Override the release or tarball URL if needed:
+
+```sh
+CURL_VERSION=8.19.0 CURLDIR=/path/to/curl-prefix rake build:curl
+CURL_URL=https://curl.se/download/curl-8.19.0.tar.xz CURLDIR=/path/to/curl-prefix rake build:curl
+```
+
+That curl build is intentionally trimmed for mruby-llm's HTTP use case:
+
+- HTTP and HTTPS only
+- OpenSSL TLS
+- no SSH, brotli, PSL, IDN2, HTTP/2, or zstd
+- static library output
+
+After that, point the build at the curl prefix:
+
+```sh
+CURLDIR=/path/to/curl-prefix rake build:toolchain
+CURLDIR=/path/to/curl-prefix rake "build:static:binary[repl.rb,repl]"
 ```
 
 ## Build
@@ -69,14 +118,14 @@ This project is an [`mrbgem`](https://mruby.org/docs/guides/mrbgems.html).
 The simplest build flow from this repo is:
 
 ```sh
-rake build
+rake build:toolchain
 ```
 
 That task expects an mruby checkout at `../mruby` by default. To use a
 different checkout:
 
 ```sh
-MRUBY_DIR=/path/to/mruby rake build
+MRUBY_DIR=/path/to/mruby rake build:toolchain
 ```
 
 These tasks run through the host Ruby, build mruby with
@@ -98,13 +147,13 @@ On FreeBSD-like systems, the build config already adds `/usr/local/include` and
 
 The standard flow is:
 
-1. Build with `rake build` or `ruby minirake`.
+1. Build with `rake build:toolchain` or `ruby minirake`.
 2. Run the built `mruby` binary against a small runtime check.
 
 For example:
 
 ```sh
-rake build
+rake build:toolchain
 bin/mruby -e 'p LLM::VERSION'
 bin/mirb
 ```

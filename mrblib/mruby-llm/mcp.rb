@@ -1,23 +1,71 @@
 # frozen_string_literal: true
 
+##
+# The {LLM::MCP LLM::MCP} class provides access to servers that
+# implement the Model Context Protocol. MCP defines a standard way for
+# clients and servers to exchange capabilities such as tools, prompts,
+# resources, and other structured interactions.
+#
+# In mruby-llm, {LLM::MCP LLM::MCP} supports stdio and HTTP transports
+# and focuses on discovering tools and prompts that can be used through
+# {LLM::Context LLM::Context} and {LLM::Agent LLM::Agent}.
+#
+# An MCP client is stateful. Coordinate lifecycle operations such as
+# {#start} and {#stop}; request methods can be issued concurrently and
+# responses are matched by JSON-RPC id.
 class LLM::MCP
-
   include RPC
 
   @clients = {}
 
+  ##
+  # @api private
   def self.clients
     @clients
   end
 
+  ##
+  # Builds an MCP client that uses the stdio transport.
+  # @param [LLM::Provider, nil] llm
+  #  An instance of LLM::Provider. Optional.
+  # @param [Hash] stdio
+  #  The stdio transport configuration.
+  # @return [LLM::MCP]
   def self.stdio(llm = nil, **stdio)
     new(llm, stdio: stdio)
   end
 
+  ##
+  # Builds an MCP client that uses the HTTP transport.
+  # @param [LLM::Provider, nil] llm
+  #  An instance of LLM::Provider. Optional.
+  # @param [Hash] http
+  #  The HTTP transport configuration.
+  # @return [LLM::MCP]
   def self.http(llm = nil, **http)
     new(llm, http: http)
   end
 
+  ##
+  # @param [LLM::Provider, nil] llm
+  #  The provider to use for MCP transports that need one.
+  # @param [Hash, nil] stdio
+  #  The configuration for the stdio transport.
+  # @option stdio [Array<String>] :argv
+  #  The command to run for the MCP process.
+  # @option stdio [Hash] :env
+  #  The environment variables to set for the MCP process.
+  # @option stdio [String, nil] :cwd
+  #  The working directory for the MCP process.
+  # @param [Hash, nil] http
+  #  The configuration for the HTTP transport.
+  # @option http [String] :url
+  #  The URL for the MCP HTTP endpoint.
+  # @option http [Hash] :headers
+  #  Extra headers for requests.
+  # @param [Integer] timeout
+  #  The maximum amount of time to wait when reading from an MCP process.
+  # @return [LLM::MCP]
   def initialize(llm = nil, stdio: nil, http: nil, timeout: 30)
     @llm = llm
     @timeout = timeout
@@ -33,6 +81,9 @@ class LLM::MCP
     end
   end
 
+  ##
+  # Starts the MCP client and initializes the session.
+  # @return [nil]
   def start
     transport.start
     call(transport, "initialize", {clientInfo: {name: "llm.rb", version: LLM::VERSION}})
@@ -40,11 +91,22 @@ class LLM::MCP
     nil
   end
 
+  ##
+  # Stops the MCP client.
+  # @return [nil]
   def stop
     transport.stop
     nil
   end
 
+  ##
+  # Starts the MCP client for the duration of a block and then stops it.
+  # @yield Runs with the MCP client started.
+  # @raise [LocalJumpError]
+  #  When called without a block.
+  # @raise [StandardError]
+  #  Propagates errors raised by {#start}, the block itself, or {#stop}.
+  # @return [nil]
   def run
     start
     yield
@@ -52,22 +114,40 @@ class LLM::MCP
     stop
   end
 
+  ##
+  # Configures the transport to remain open across multiple operations.
+  # This is mainly useful for HTTP MCP transports that support session
+  # continuity.
+  # @return [LLM::MCP]
   def persist!
     transport.persist!
     self
   end
   alias_method :persistent, :persist!
 
+  ##
+  # Returns the tools provided by the MCP server.
+  # @return [Array<Class<LLM::Tool>>]
   def tools
     res = call(transport, "tools/list")
     [*res["tools"]].map { LLM::Tool.mcp(self, _1) }
   end
 
+  ##
+  # Returns the prompts provided by the MCP server.
+  # @return [Array<LLM::Object>]
   def prompts
     res = call(transport, "prompts/list")
     LLM::Object.from(res["prompts"])
   end
 
+  ##
+  # Returns a prompt by name.
+  # @param [String] name
+  #  The prompt name.
+  # @param [Hash<String, String>, nil] arguments
+  #  The prompt arguments.
+  # @return [LLM::Object]
   def find_prompt(name:, arguments: nil)
     params = {name: name}
     params[:arguments] = arguments if arguments
@@ -83,6 +163,13 @@ class LLM::MCP
   end
   alias_method :get_prompt, :find_prompt
 
+  ##
+  # Calls a tool by name with the given arguments.
+  # @param [String] name
+  #  The name of the tool to call.
+  # @param [Hash] arguments
+  #  The arguments to pass to the tool.
+  # @return [Object]
   def call_tool(name, arguments = {})
     res = call(transport, "tools/call", {name: name, arguments: arguments})
     adapt_tool_result(res)

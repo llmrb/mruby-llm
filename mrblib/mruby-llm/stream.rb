@@ -37,6 +37,8 @@ module LLM
 
     ##
     # Returns a lazily-initialized queue for tool results.
+    # Stream callbacks can push work into this queue and later resolve it
+    # through {#wait}.
     # @return [LLM::Stream::Queue]
     def queue
       @queue ||= LLM::Stream::Queue.new(self)
@@ -45,6 +47,7 @@ module LLM
     ##
     # Waits for queued tool results and returns them.
     # @param [Symbol] strategy
+    #  The execution strategy. mruby currently supports `:call` only.
     # @return [Array<LLM::Function::Return>]
     def wait(strategy = :call)
       queue.wait(strategy)
@@ -73,6 +76,9 @@ module LLM
 
     ##
     # Called when a streamed tool call has been fully constructed.
+    # @note A stream implementation may start tool execution here and push
+    #   the resulting work onto {#queue}. In the mruby runtime this currently
+    #   means executing through `:call`.
     # @note When a streamed tool cannot be resolved, `error` is passed as an
     #   {LLM::Function::Return}. It can be sent back to the model, allowing
     #   the tool-call path to recover and the session to continue. Streamed

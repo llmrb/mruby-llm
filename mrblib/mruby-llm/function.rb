@@ -182,9 +182,16 @@ class LLM::Function
 
   ##
   # Calls the function through the mruby runtime surface.
-  # Concurrency strategies are intentionally not exposed in the mruby port yet.
+  #
+  # This is the low-level method that powers tool execution. In the mruby
+  # runtime, function concurrency strategies are intentionally not exposed yet,
+  # so spawning a function is currently equivalent to calling it directly.
+  # Prefer the collection methods on {LLM::Context#functions} for most use
+  # cases, such as {LLM::Function::Array#call}, {LLM::Function::Array#wait},
+  # or {LLM::Function::Array#spawn}.
   #
   # @param [Symbol] strategy
+  #  The execution strategy. mruby currently supports `:call` only.
   # @return [LLM::Function::Return]
   def spawn(strategy = :call)
     raise ArgumentError, "Unknown strategy: #{strategy.inspect}. Expected :call" unless strategy == :call

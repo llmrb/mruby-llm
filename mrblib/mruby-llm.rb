@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module LLM
-
-  @monitors = {require: Monitor.new, clients: Monitor.new,
-               inherited: Monitor.new, registry: Monitor.new, mcp: Monitor.new}
+  @monitors = {require: ::Monitor.new, clients: ::Monitor.new,
+               inherited: ::Monitor.new, registry: ::Monitor.new, mcp: ::Monitor.new}
   @registry = {}
   @clients = {}
 

@@ -5,8 +5,8 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
   spec.description = 'Ruby toolkit for multiple Large Language Models (LLMs)'
 
   spec.rbfiles = %w[
-    mrblib/mruby-llm.rb
     mrblib/mruby-llm/monitor.rb
+    mrblib/mruby-llm.rb
     mrblib/mruby-llm/yaml.rb
     mrblib/mruby-llm/uri.rb
     mrblib/net/http.rb

@@ -44,7 +44,7 @@ class LLM::Google
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
     def all(**params)
-      query = URI.encode_www_form(params.merge!(key: key))
+      query = LLM::URI.encode_www_form(params.merge!(key: key))
       req = Net::HTTP::Get.new("/v1beta/files?#{query}", headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :files)
@@ -90,7 +90,7 @@ class LLM::Google
     # @return [LLM::Response]
     def get(file:, **params)
       file_id = file.respond_to?(:name) ? file.name : file.to_s
-      query = URI.encode_www_form(params.merge!(key: key))
+      query = LLM::URI.encode_www_form(params.merge!(key: key))
       req = Net::HTTP::Get.new("/v1beta/#{file_id}?#{query}", headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :file)
@@ -110,7 +110,7 @@ class LLM::Google
     # @return [LLM::Response]
     def delete(file:, **params)
       file_id = file.respond_to?(:name) ? file.name : file.to_s
-      query = URI.encode_www_form(params.merge!(key: key))
+      query = LLM::URI.encode_www_form(params.merge!(key: key))
       req = Net::HTTP::Delete.new("/v1beta/#{file_id}?#{query}", headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = LLM::Response.new(res)

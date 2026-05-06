@@ -1,28 +1,5 @@
 # frozen_string_literal: true
 
-module URI
-  def self.encode_www_form(params)
-    [*params].map do |key, value|
-      "#{escape(key)}=#{escape(value)}"
-    end.join("&")
-  end
-
-  def self.parse(value)
-    value.to_s
-  end
-
-  def self.escape(value)
-    value.to_s.bytes.map do |byte|
-      char = byte.chr
-      if /[A-Za-z0-9_.~-]/.match?(char)
-        char
-      else
-        "%%%02X" % byte
-      end
-    end.join
-  end
-end
-
 module Net
   class HTTP
     class HTTPRequest

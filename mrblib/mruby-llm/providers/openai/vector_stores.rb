@@ -30,7 +30,7 @@ class LLM::OpenAI
     # @param [Hash] params Other parameters (see OpenAI docs)
     # @return [LLM::Response]
     def all(**params)
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       req = Net::HTTP::Get.new(path("/vector_stores?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :enumerable)
@@ -139,7 +139,7 @@ class LLM::OpenAI
     # @see https://platform.openai.com/docs/api-reference/vector_stores_files/listFiles OpenAI docs
     def all_files(vector:, **params)
       vector_id = vector.respond_to?(:id) ? vector.id : vector
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       req = Net::HTTP::Get.new(path("/vector_stores/#{vector_id}/files?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :enumerable)
@@ -208,7 +208,7 @@ class LLM::OpenAI
     def get_file(vector:, file:, **params)
       vector_id = vector.respond_to?(:id) ? vector.id : vector
       file_id = file.respond_to?(:id) ? file.id : file
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       req = Net::HTTP::Get.new(path("/vector_stores/#{vector_id}/files/#{file_id}?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = LLM::Response.new(res)

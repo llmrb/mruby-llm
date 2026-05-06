@@ -39,7 +39,7 @@ class LLM::OpenAI
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
     def all(**params)
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       req = Net::HTTP::Get.new(path("/files?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :enumerable)
@@ -82,7 +82,7 @@ class LLM::OpenAI
     # @return [LLM::Response]
     def get(file:, **params)
       file_id = file.respond_to?(:id) ? file.id : file
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       req = Net::HTTP::Get.new(path("/files/#{file_id}?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :file)
@@ -103,7 +103,7 @@ class LLM::OpenAI
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
     def download(file:, **params)
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       file_id = file.respond_to?(:id) ? file.id : file
       req = Net::HTTP::Get.new(path("/files/#{file_id}/content?#{query}"), headers)
       io = StringIO.new("".b)

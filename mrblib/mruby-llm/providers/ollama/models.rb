@@ -41,7 +41,7 @@ class LLM::Ollama
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
     def all(**params)
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       req = Net::HTTP::Get.new("/api/tags?#{query}", headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :models)

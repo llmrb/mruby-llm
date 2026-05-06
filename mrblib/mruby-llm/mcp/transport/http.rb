@@ -5,7 +5,7 @@ module LLM::MCP::Transport
     require_relative "http/event_handler"
 
     def initialize(url:, headers: {}, timeout: nil)
-      @uri = URI.parse(url)
+      @uri = LLM::URI.parse(url)
       @headers = headers
       @timeout = timeout
       @queue = []

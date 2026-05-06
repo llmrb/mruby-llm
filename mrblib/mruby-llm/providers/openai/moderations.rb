@@ -23,7 +23,7 @@ class LLM::OpenAI
   #   require "llm"
   #
   #   llm = LLM.openai(key: ENV["KEY"])
-  #   res = llm.moderations.create input: URI.parse("https://example.com/image.png")
+  #   res = llm.moderations.create input: LLM::URI.parse("https://example.com/image.png")
   #   mod = res.moderations[0]
   #   print "categories: #{mod.categories}", "\n"
   #   print "scores: #{mod.scores}", "\n"

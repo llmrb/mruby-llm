@@ -12,6 +12,7 @@
 /.env
 /script
 /bench/
+/bin/
 /tasks/benchmark.rake
 
 # rspec failure tracking

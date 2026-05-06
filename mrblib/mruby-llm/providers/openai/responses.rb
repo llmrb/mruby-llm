@@ -60,7 +60,7 @@ class LLM::OpenAI
     # @return [LLM::Response]
     def get(response, **params)
       response_id = response.respond_to?(:id) ? response.id : response
-      query = URI.encode_www_form(params)
+      query = LLM::URI.encode_www_form(params)
       req = Net::HTTP::Get.new(path("/responses/#{response_id}?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :responds)

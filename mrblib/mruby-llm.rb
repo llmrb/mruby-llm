@@ -2,6 +2,7 @@
 
 module LLM
   require_relative "mruby-llm/monitor"
+  require_relative "mruby-llm/uri"
   require_relative "mruby-llm/tracer"
   require_relative "mruby-llm/error"
   require_relative "mruby-llm/hash"

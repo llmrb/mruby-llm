@@ -8,10 +8,11 @@
 
 ## About
 
-mruby-llm is a fork of Ruby's most capable AI runtime - [llm.rb](https://github.com/llmrb/llm.rb)
-and it brings the same functionality to mruby. It keeps the same execution model
-and most of the same features but adapted for mruby. Core runtime features are
-supported, including multiple providers,
+mruby-llm is a fork of Ruby's most capable AI runtime -
+[llm.rb](https://github.com/llmrb/llm.rb) and it brings the same
+functionality to mruby. It keeps the same execution model and most of the
+same features but adapted for mruby. Core runtime features are supported,
+including multiple providers,
 [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html),
 [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html),
 tools, skills, MCP, streaming, schemas, files, and persistence.
@@ -33,6 +34,33 @@ tools, skills, MCP, streaming, schemas, files, and persistence.
 - MCP over stdio
 - MCP over HTTP
 - MCP tools inside [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+
+## Example
+
+[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) is where
+the runtime starts to feel bigger than a chat wrapper. An agent can hold
+instructions, carry state, call tools, and keep looping until it has
+finished the task.
+
+In this example, the agent can inspect the request, call `WeatherTool`,
+decide whether the picnic should happen, call `CalendarTool`, and then
+return a final answer in one runtime flow.
+
+```ruby
+class TravelAgent < LLM::Agent
+  model "deepseek-chat"
+  instructions "You are a concise travel assistant. Use tools when they help."
+  tools WeatherTool, CalendarTool
+end
+
+llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
+agent = TravelAgent.new(llm)
+
+res = agent.talk(
+  "If Tokyo is warm this Saturday, plan a picnic and put it on my calendar."
+)
+puts res.content
+```
 
 ## Integration
 

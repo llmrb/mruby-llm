@@ -30,8 +30,8 @@ module LLM
 
     ##
     # @param key (see LLM::Provider#initialize)
-    def initialize(base_path: "/v1", **)
-      super(host: HOST, base_path:, **)
+    def initialize(host: HOST, base_path: "/v1", **)
+      super(host:, base_path:, **)
     end
 
     ##

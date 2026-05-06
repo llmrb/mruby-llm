@@ -16,7 +16,7 @@ module LLM
     # @param [String] host A regional host or the default ("api.z.ai")
     # @param key (see LLM::Provider#initialize)
     def initialize(host: "api.z.ai", **)
-      super
+      super(host:, **)
     end
 
     ##

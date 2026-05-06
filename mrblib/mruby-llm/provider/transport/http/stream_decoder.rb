@@ -149,5 +149,6 @@ module LLM::Provider::Transport
       @buffer = @buffer[@cursor..] || +""
       @cursor = 0
     end
+
   end
 end

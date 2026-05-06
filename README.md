@@ -48,9 +48,9 @@ different checkout:
 MRUBY_DIR=/path/to/mruby rake build
 ```
 
-The task runs through the host Ruby, builds mruby with
-[build_config/mruby-llm.rb](build_config/mruby-llm.rb), and copies the built
-binaries into `bin/`.
+These tasks run through the host Ruby, build mruby with
+[build_config/mruby-llm.rb](build_config/mruby-llm.rb), and copy the built
+mruby toolchain into `bin/`.
 
 The equivalent direct `minirake` flow is:
 
@@ -62,6 +62,33 @@ ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb
 
 On FreeBSD-like systems, the build config already adds `/usr/local/include` and
 `/usr/local/lib` for `libcurl`.
+
+## How Do I Build An Executable Binary?
+
+To produce a real native executable from a Ruby entrypoint, use:
+
+```sh
+rake "binary[repl.rb,repl]"
+```
+
+That task:
+
+- compiles the input Ruby file to embedded mruby bytecode with `mrbc`
+- generates a small C entrypoint
+- links a native executable against the built mruby libraries
+- writes the result to `bin/<output>`
+
+Examples:
+
+```sh
+rake "binary[repl.rb,repl]"
+DEEPSEEK_SECRET=... bin/repl
+```
+
+```sh
+rake "binary[foo.rb,foo]"
+bin/foo
+```
 
 ## Test
 

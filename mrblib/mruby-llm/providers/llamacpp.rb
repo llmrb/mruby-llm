@@ -22,7 +22,7 @@ module LLM
     # @param (see LLM::Provider#initialize)
     # @return [LLM::LlamaCpp]
     def initialize(host: "localhost", port: 8080, ssl: false, **)
-      super
+      super(host:, port:, ssl:, **)
     end
 
     ##

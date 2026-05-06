@@ -101,6 +101,7 @@ class LLM::Provider
         raw = @curl.send(request_url(request), build_http_request(request)) do |header, chunk|
           raise LLM::Interrupt, "request interrupted" if interrupted?(owner)
           response ||= Net::HTTPResponse.from_http(header)
+          decoder.chunked = response["transfer-encoding"].to_s.downcase.include?("chunked")
           decoder << chunk
         end
         response ||= Net::HTTPResponse.from_http(raw)

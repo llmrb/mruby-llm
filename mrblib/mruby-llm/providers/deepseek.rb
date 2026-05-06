@@ -22,7 +22,7 @@ module LLM
     # @param (see LLM::Provider#initialize)
     # @return [LLM::DeepSeek]
     def initialize(host: "api.deepseek.com", port: 443, ssl: true, **)
-      super
+      super(host:, port:, ssl:, **)
     end
 
     ##

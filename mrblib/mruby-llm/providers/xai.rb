@@ -20,7 +20,7 @@ module LLM
     # @param key (see LLM::Provider#initialize)
     # @see https://docs.x.ai/docs/key-information/regions Regional endpoints
     def initialize(host: "api.x.ai", **)
-      super
+      super(host:, **)
     end
 
     ##

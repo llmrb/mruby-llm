@@ -17,6 +17,11 @@ mruby. Core runtime features are supported, including providers,
 [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html), tools,
 skills, MCP, streaming, schemas, files, and persistence.
 
+The HTTP layer uses `mruby-curl`, and the runtime includes a small
+[`Net::HTTP`](https://ruby-doc.org/stdlib-3.3.0/libdoc/net/http/rdoc/Net/HTTP.html)
+compatibility layer built around curl so the existing provider code can be
+reused under mruby.
+
 ## Status
 
 The runtime supports:
@@ -33,12 +38,30 @@ The runtime supports:
 
 ## Build
 
-This project is an
-[`mrbgem`](https://mruby.org/docs/guides/mrbgems.html). Build it through an
-mruby checkout using [build_config/mruby-llm.rb](build_config/mruby-llm.rb):
+This project is an [`mrbgem`](https://mruby.org/docs/guides/mrbgems.html).
+
+The simplest build flow from this repo is:
+
+```sh
+rake build
+```
+
+That task expects an mruby checkout at `../mruby` by default. To use a
+different checkout:
+
+```sh
+MRUBY_DIR=/path/to/mruby rake build
+```
+
+The task runs through the host Ruby, builds mruby with
+[build_config/mruby-llm.rb](build_config/mruby-llm.rb), and copies the built
+binaries into `bin/`.
+
+The equivalent direct `minirake` flow is:
 
 ```sh
 cd /path/to/mruby
+ruby minirake clean
 ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb
 ```
 
@@ -49,17 +72,15 @@ On FreeBSD-like systems, the build config already adds `/usr/local/include` and
 
 The standard flow is:
 
-1. Add this gem to an mruby build config.
-2. Build mruby with `minirake`.
-3. Run the built `mruby` binary against a small runtime check.
+1. Build with `rake build` or `ruby minirake`.
+2. Run the built `mruby` binary against a small runtime check.
 
-With the included config:
+For example:
 
 ```sh
-cd /path/to/mruby
-ruby minirake clean
-ruby minirake MRUBY_CONFIG=/absolute/path/to/mruby-llm/build_config/mruby-llm.rb
-build/mruby-llm/bin/mruby -e 'p LLM::VERSION'
+rake build
+bin/mruby -e 'p LLM::VERSION'
+bin/mirb
 ```
 
 ## Runtime Dependencies

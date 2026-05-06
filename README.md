@@ -40,11 +40,7 @@ tools, skills, MCP, streaming, schemas, files, and persistence.
 [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) is where
 the runtime starts to feel bigger than a chat wrapper. An agent can hold
 instructions, carry state, call tools, and keep looping until it has
-finished the task.
-
-In this example, the agent can inspect the request, call `WeatherTool`,
-decide whether the picnic should happen, call `CalendarTool`, and then
-return a final answer in one runtime flow.
+finished the task:
 
 ```ruby
 class TravelAgent < LLM::Agent

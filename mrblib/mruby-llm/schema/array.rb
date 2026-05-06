@@ -1,0 +1,33 @@
+# frozen_string_literal: true
+
+class LLM::Schema
+  ##
+  # The {LLM::Schema::Array LLM::Schema::Array} class represents an
+  # array value in a JSON schema. It is a subclass of
+  # {LLM::Schema::Leaf LLM::Schema::Leaf} and provides methods that
+  # can act as constraints.
+  class Array < Leaf
+    ##
+    # Returns an array for the given type
+    # @return [LLM::Schema::Array]
+    def self.[](type)
+      new(type.new)
+    end
+
+    def initialize(items)
+      @items = items
+    end
+
+    def to_h
+      super.merge!({type: "array", items: serialize(items)})
+    end
+
+    def to_json(options = {})
+      to_h.to_json(options)
+    end
+
+    private
+
+    attr_reader :items
+  end
+end

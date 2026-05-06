@@ -1,0 +1,19 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/docs/
+/pkg/
+/spec/reports/
+/tmp/
+/*.eld
+/*.lock
+/.env
+/script
+/bench/
+/tasks/benchmark.rake
+
+# rspec failure tracking
+.rspec_status
+.tool-versions

@@ -1,0 +1,182 @@
+# frozen_string_literal: true
+
+##
+# The {LLM::Object LLM::Object} class encapsulates a Hash object. It is
+# similar in spirit to OpenStruct, and it was introduced after OpenStruct
+# became a bundled gem rather than a default gem in Ruby 3.5.
+class LLM::Object < BasicObject
+  require_relative "object/builder"
+  require_relative "object/kernel"
+
+  SINGLETON = self
+  UNDEFINED = ::Object.new.freeze
+  LLM = ::LLM
+
+  ##
+  # @api private
+  # @param [Hash] h
+  # @param [#to_s, #to_sym] k
+  # @return [String, Symbol, nil]
+  def self.key(h, k)
+    return nil if k.nil?
+    if h.key?(k.to_s)
+      k.to_s
+    elsif h.key?(k.to_sym)
+      k.to_sym
+    else
+      nil
+    end
+  end
+
+  ##
+  # @api private
+  # @param [Hash] h
+  # @param [#to_s, #to_sym] k
+  # @return [Object, nil]
+  def self.get(h, k)
+    name = key(h, k)
+    h[name] if name
+  end
+
+  ##
+  # @param [Hash] h
+  # @return [LLM::Object]
+  def initialize(h = {})
+    @h = h || {}
+  end
+
+  ##
+  # Yields a key|value pair to a block.
+  # @yieldparam [Symbol] k
+  # @yieldparam [Object] v
+  # @return [void]
+  def each(&)
+    @h.each(&)
+  end
+
+  ##
+  # @param [Symbol, #to_sym] k
+  # @return [Object]
+  def [](k)
+    @h[SINGLETON.key(@h, k)]
+  end
+
+  ##
+  # @param [Symbol, #to_sym] k
+  # @param [Object] v
+  # @return [void]
+  def []=(k, v)
+    @h[k.to_s] = v
+  end
+
+  ##
+  # @return [String]
+  def to_json(...)
+    LLM.json.dump(to_h, ...)
+  end
+
+  ##
+  # @return [Boolean]
+  def empty?
+    @h.empty?
+  end
+
+  ##
+  # @return [Hash]
+  def to_h
+    @h.dup
+  end
+
+  ##
+  # @return [Hash]
+  def to_hash
+    @h.transform_keys(&:to_sym)
+  end
+
+  ##
+  # @return [Array<String>]
+  def keys
+    @h.keys
+  end
+
+  ##
+  # @return [Array]
+  def values
+    @h.values
+  end
+
+  ##
+  # @param [String, Symbol] k
+  # @return [Boolean]
+  def key?(k = UNDEFINED)
+    return SINGLETON.get(@h, :key?) if k.equal?(UNDEFINED)
+    @h.key?(SINGLETON.key(@h, k))
+  end
+  alias_method :has_key?, :key?
+
+  ##
+  # @param [String, Symbol] k
+  # @return [Object]
+  def fetch(k = UNDEFINED, *args, &b)
+    return SINGLETON.get(@h, :fetch) if k.equal?(UNDEFINED)
+    @h.fetch(SINGLETON.key(@h, k), *args, &b)
+  end
+
+  ##
+  # @param [Hash, to_h] other
+  #  The hash to merge
+  # @return [LLM::Object]
+  #  Returns a new LLM::Object
+  def merge(other = UNDEFINED)
+    return SINGLETON.get(@h, :merge) if other.equal?(UNDEFINED)
+    other = LLM::Hash.try_convert(other)
+    raise TypeError, "#{other} cannot be coerced into a Hash" unless other
+    SINGLETON.from @h.merge(other)
+  end
+
+  ##
+  # @param [#to_s, #to_sym] k
+  #  The key name
+  # @return [void]
+  def delete(k = UNDEFINED)
+    return SINGLETON.get(@h, :delete) if k.equal?(UNDEFINED)
+    @h.delete(SINGLETON.key(@h, k))
+  end
+
+  ##
+  # @return [Integer]
+  def size
+    @h.size
+  end
+  alias_method :length, :size
+
+  ##
+  # @yieldparam [String, Object]
+  def each_pair(&)
+    @h.each(&)
+  end
+
+  ##
+  # @return [Object, nil]
+  def dig(*args)
+    return SINGLETON.get(@h, :dig) if args.empty?
+    @h.dig(*args)
+  end
+
+  ##
+  # @return [Hash]
+  def slice(*args)
+    return SINGLETON.get(@h, :slice) if args.empty?
+    @h.slice(*args)
+  end
+
+  def method_missing(m, *args, &b)
+    if m.to_s.end_with?("=")
+      self[m[0..-2]] = args.first
+    elsif k = SINGLETON.key(@h, m)
+      @h[k]
+    else
+      nil
+    end
+  end
+end

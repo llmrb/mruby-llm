@@ -1,0 +1,79 @@
+# frozen_string_literal: true
+
+module LLM
+  ##
+  # The LlamaCpp class implements a provider for
+  # [llama.cpp](https://github.com/ggml-org/llama.cpp)
+  # through the OpenAI-compatible API provided by the
+  # llama-server binary. Similar to the ollama provider,
+  # this provider supports a wide range of models and
+  # is straightforward to run on your own hardware.
+  #
+  # @example
+  #   #!/usr/bin/env ruby
+  #   require "llm"
+  #
+  #   llm = LLM.llamacpp(key: nil)
+  #   ctx = LLM::Context.new(llm)
+  #   ctx.talk ["Tell me about this photo", ctx.local_file("/images/photo.png")]
+  #   ctx.messages.select(&:assistant?).each { print "[#{_1.role}]", _1.content, "\n" }
+  class LlamaCpp < OpenAI
+    ##
+    # @param (see LLM::Provider#initialize)
+    # @return [LLM::LlamaCpp]
+    def initialize(host: "localhost", port: 8080, ssl: false, **)
+      super
+    end
+
+    ##
+    # @return [Symbol]
+    #  Returns the provider's name
+    def name
+      :llamacpp
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def files
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def images
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def audio
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def moderations
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def responses
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def vector_stores
+      raise NotImplementedError
+    end
+
+    ##
+    # Returns the default model for chat completions
+    # @see https://ollama.com/library/qwen3 qwen3
+    # @return [String]
+    def default_model
+      "qwen3"
+    end
+  end
+end

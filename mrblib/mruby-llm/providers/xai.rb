@@ -1,0 +1,77 @@
+# frozen_string_literal: true
+
+module LLM
+  ##
+  # The XAI class implements a provider for [xAI](https://docs.x.ai).
+  #
+  # @example
+  #   #!/usr/bin/env ruby
+  #   require "llm"
+  #
+  #   llm = LLM.xai(key: ENV["KEY"])
+  #   ctx = LLM::Context.new(llm)
+  #   ctx.talk ["Tell me about this photo", ctx.local_file("/images/photo.png")]
+  #   ctx.messages.select(&:assistant?).each { print "[#{_1.role}]", _1.content, "\n" }
+  class XAI < OpenAI
+    require_relative "xai/images"
+
+    ##
+    # @param [String] host A regional host or the default ("api.x.ai")
+    # @param key (see LLM::Provider#initialize)
+    # @see https://docs.x.ai/docs/key-information/regions Regional endpoints
+    def initialize(host: "api.x.ai", **)
+      super
+    end
+
+    ##
+    # @return [Symbol]
+    #  Returns the provider's name
+    def name
+      :xai
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def files
+      raise NotImplementedError
+    end
+
+    ##
+    # @return [LLM::XAI::Images]
+    def images
+      LLM::XAI::Images.new(self)
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def audio
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def moderations
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def responses
+      raise NotImplementedError
+    end
+
+    ##
+    # @raise [NotImplementedError]
+    def vector_stores
+      raise NotImplementedError
+    end
+
+    ##
+    # Returns the default model for chat completions
+    # #see https://docs.x.ai/docs/models grok-4-0709
+    # @return [String]
+    def default_model
+      "grok-4-0709"
+    end
+  end
+end

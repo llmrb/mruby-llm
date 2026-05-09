@@ -18,7 +18,7 @@ class LLM::Registry
   def self.for(name)
     path = File.join @root, "data", "#{name}.json"
     if File.file?(path)
-      new LLM.json.load(File.binread(path))
+      new LLM.json.load(File.read(path))
     else
       raise LLM::NoSuchRegistryError, "no registry found for #{name}"
     end
@@ -60,8 +60,7 @@ class LLM::Registry
     if @models.key?(model)
       @models[model]
     else
-      patterns = {/-\d{4}-\d{2}-\d{2}$/ => "", /\A(gpt-.*)-\d{4}$/ => "\\1"}
-      fallback = find_map(patterns) { model.dup.sub!(_1, _2) } || "none"
+      fallback = fallback_model(model) || "none"
       if @models.key?(fallback)
         @models[fallback]
       else
@@ -71,11 +70,10 @@ class LLM::Registry
   end
 
   ##
-  # Similar to #{find} but returns the block's return value
-  # @return [Object, nil]
-  def find_map(pair)
-    result = nil
-    pair.each_pair { break if result = yield(_1, _2) }
-    result
+  # @api private
+  def fallback_model(model)
+    return model[0...-11] if model =~ /-\d{4}-\d{2}-\d{2}$/
+    return model[0...-5] if model =~ /\Agpt-.*-\d{4}$/
+    nil
   end
 end

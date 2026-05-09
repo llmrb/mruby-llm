@@ -49,4 +49,4 @@ describe "LLM::Mime" do
   end
 end
 
-Minitest.run(ARGV)
+Minitest.run(ARGV) || exit(1)

@@ -8,72 +8,85 @@
 
 ## About
 
-mruby-llm is a fork of Ruby's most capable AI runtime -
-[llm.rb](https://github.com/llmrb/llm.rb) and it brings the same
-functionality to mruby. It keeps the same execution model and most of the
-same features but adapted for mruby. Core runtime features are supported,
-including multiple providers,
-[`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html),
-[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html),
-tools, skills, MCP, streaming, schemas, files, and persistence.
+mruby-llm is mruby's most capable AI runtime.
+
+It brings multi-provider chat, agents, tools, schemas, streaming,
+file handling, and MCP to the mruby runtime in a form that can be
+embedded into small standalone applications. The project began as
+a fork of [llm.rb](https://github.com/llmrb/llm.rb).
 
 ## Features
 
-- Multi-provider chat built on the `llm.rb` execution model
-- Stateful conversations with [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
-- Higher-level orchestration with [`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html)
-- Prompt composition with `LLM::Prompt` and `LLM::Buffer`
-- Structured outputs and schemas with `LLM::Schema`
-- Streaming responses
-- Local tool calling
-- Skills
-- Context transformers
-- Loop guards with `LLM::LoopGuard`
-- Context compaction
-- Save and restore state from disk
-- MCP over stdio
-- MCP over HTTP
-- MCP tools inside [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+- **Providers** <br>
+  OpenAI, Anthropic, Google Gemini, Ollama, DeepSeek, llama.cpp, xAI, and Z.ai
+- **Contexts** <br>
+  Stateful conversations, message history, params, and execution state through `LLM::Context`
+- **Messages & Buffers** <br>
+  Lower-level conversation and prompt primitives with `LLM::Message` and `LLM::Buffer`
+- **Agents** <br>
+  Reusable assistants with instructions, tools, skills, schemas, and automatic tool-loop handling
+- **Skills Support** <br>
+  Directory-backed skills loaded from `SKILL.md`
+- **Tool Calling** <br>
+  Closure-based tools via `LLM.function` and class-based tools via `LLM::Tool`
+- **Structured Output** <br>
+  Schema-driven outputs through `LLM::Schema`
+- **Runtime Objects** <br>
+  Nested provider data and tool payloads through `LLM::Object`
+- **Streaming** <br>
+  Visible content, reasoning content, tool-call events, and queued tool returns
+- **Files** <br>
+  Local files, remote file references, mime lookup, and multipart request helpers
+- **MCP Support** <br>
+  Stdio and HTTP MCP transports with routing, mailbox handling, and tool bridging
+- **Persistence** <br>
+  Save and restore context state across runs
+- **Context Compaction** <br>
+  Summarize older history in long-lived contexts
+- **Loop Guards** <br>
+  Detect and stop repeated tool-call execution patterns
+- **Tracing & Registries** <br>
+  Runtime tracing hooks, provider registries, and local model metadata
 
 ## Example
 
-[`LLM::Agent`](https://0x1eef.github.io/x/llm.rb/LLM/Agent.html) lets you
-define a reusable agent with instructions, tools, and an execution loop
-built in:
-
 ```ruby
-class TravelAgent < LLM::Agent
-  model "deepseek-chat"
-  instructions "You are a concise travel assistant. Use tools when they help."
+class Agent < LLM::Agent
+  model "deepseek-v4"
+  instructions "Use tools when they help."
   tools WeatherTool, CalendarTool
 end
 
 llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
-agent = TravelAgent.new(llm)
-
+agent = Agent.new(llm)
 res = agent.talk("If Tokyo is warm this Saturday, plan a picnic and put it on my calendar.")
+puts res.content
+```
+
+Or at the lower-level context surface:
+
+```ruby
+llm = LLM.openai(key: ENV["OPENAI_API_KEY"])
+ctx = LLM::Context.new(llm, model: "gpt-4.1-mini")
+res = ctx.talk("Return a haiku about FreeBSD.")
 puts res.content
 ```
 
 ## Integration
 
-`mruby-llm` is an [`mrbgem`](https://mruby.org/docs/guides/mrbgems.html).
-
-Add it to your own mruby build config. A typical consumer build looks like:
+Add to your mruby build config:
 
 ```ruby
 MRuby::Build.new("app") do |conf|
+  curldir = File.expand_path(ENV["CURLDIR"] || "/usr/local")
   conf.toolchain
+
+  conf.cc.include_paths << File.join(curldir, "include")
+  conf.linker.library_paths << File.join(curldir, "lib")
+
   conf.gembox "default"
+  conf.gem github: "llmrb/mruby-llm", branch: "main"
   conf.enable_debug
-
-  conf.cc.include_paths << "/usr/local/include"
-  conf.linker.library_paths << "/usr/local/lib"
-
-  conf.gem "/absolute/path/to/mruby-llm"
-
-  conf.enable_bintest
-  conf.enable_test
 end
 ```
 
@@ -83,20 +96,13 @@ Then build through your mruby checkout:
 ruby minirake MRUBY_CONFIG=/absolute/path/to/build_config.rb
 ```
 
-`mruby-llm` pulls in its own mrbgem dependencies through
-[mrbgem.rake](mrbgem.rake), so the consumer build config only needs to:
+Dependencies are declared in [mrbgem.rake](mrbgem.rake). In practice the
+main external build requirement is `libcurl`, because the runtime depends on
+`mruby-curl` and `mruby-http`.
 
-- choose the mruby toolchain
-- set any include and library paths needed for `libcurl`
-- include `mruby-llm`
-- define any application-specific binaries or extra gems
+## Dependencies
 
-Consumer projects are expected to own their own build configuration, toolchain
-choices, and executable packaging.
-
-## Runtime Dependencies
-
-The gem depends on:
+Declared mrbgem dependencies include:
 
 - `mruby-http`
 - `mruby-curl`
@@ -111,6 +117,17 @@ The gem depends on:
 - `mruby-regexp`
 
 See [mrbgem.rake](mrbgem.rake).
+
+## Origins
+
+### llm.rb
+
+mruby-llm implements the same overall execution model as
+[llm.rb](https://github.com/llmrb/llm.rb#readme):
+providers, contexts, agents, tools, schemas, streaming, and MCP.
+The mruby port keeps that surface where it makes sense, but adapts the
+runtime to mruby constraints such as explicit builds, smaller standard
+library surface, and a more modest concurrency story.
 
 ## License
 

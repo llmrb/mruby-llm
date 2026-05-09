@@ -67,7 +67,7 @@ class LLM::Tool
         elsif Class === type && type.respond_to?(:object)
           type.object
         else
-          target = type.name.split("::").last.downcase
+          target = LLM::Utils.split(type.name, "::").last.downcase
           schema.public_send(target)
         end
       end

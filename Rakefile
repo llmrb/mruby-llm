@@ -14,6 +14,7 @@ desc "run tests"
 task test: [:build] do
   Dir["spec/*_spec.rb"].each do |t|
     sh "bin/mruby #{t}"
+    exit $?.exitstatus unless $?.success?
   end
 end
 

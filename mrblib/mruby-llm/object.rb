@@ -92,6 +92,12 @@ class LLM::Object < BasicObject
   end
 
   ##
+  # @return [Hash]
+  def transform_values!(&b)
+    @h.transform_values!(&b)
+  end
+
+  ##
   # @return [Array<String>]
   def keys
     @h.keys
@@ -170,7 +176,7 @@ class LLM::Object < BasicObject
 
   def method_missing(m, *args, &b)
     if m.to_s.end_with?("=")
-      self[m[0..-2]] = args.first
+      self[m.to_s[0..-2]] = args.first
     elsif k = SINGLETON.key(@h, m)
       @h[k]
     else

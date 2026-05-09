@@ -1,14 +1,25 @@
-# frozen_string_literal: true
+require "rbconfig"
 
-task default: :help
+desc "build binaries"
+task build: [:preflight] do
+  Dir.chdir ENV["MRUBY"] do
+    argv = ["-S", "rake", "MRUBY_CONFIG=#{__dir__}/build.rb", "clean", "build"]
+    sh RbConfig.ruby, *argv
+    rm_rf File.join(__dir__, "bin")
+    mv File.join(Dir.pwd, "build", "mruby-llm", "bin"), __dir__
+  end
+end
 
-desc "Show mruby-llm integration notes"
-task :help do
-  puts "mruby-llm is an mrbgem."
-  puts
-  puts "Add it to your mruby build config with:"
-  puts '  conf.gem "/absolute/path/to/mruby-llm"'
-  puts
-  puts "Then build through your own mruby checkout with:"
-  puts "  ruby minirake MRUBY_CONFIG=/absolute/path/to/build_config.rb"
+desc "run tests"
+task test: [:build] do
+  Dir["spec/*_spec.rb"].each do |t|
+    sh "bin/mruby #{t}"
+  end
+end
+
+task :preflight do
+  if ENV["MRUBY"].nil? || !File.directory?(ENV["MRUBY"])
+    warn "error: $MRUBY does not reference an mruby checkout"
+    exit 1
+  end
 end

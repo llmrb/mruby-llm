@@ -38,7 +38,7 @@ class LLM::Schema
     def to_h
       super.merge!({
         type: "object",
-        properties: serialize(properties),
+        properties:,
         required: required_items
       })
     end

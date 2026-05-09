@@ -19,7 +19,7 @@ class LLM::Schema
     end
 
     def to_h
-      super.merge!({type: "array", items: serialize(items)})
+      super.merge!({type: "array", items:})
     end
 
     def to_json(options = {})

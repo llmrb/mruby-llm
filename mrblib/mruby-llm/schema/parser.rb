@@ -112,7 +112,7 @@ class LLM::Schema
       return schema unless schema.key?("$ref")
       ref = schema["$ref"]
       raise TypeError, "unsupported schema ref #{ref.inspect}" unless ref.start_with?("#/")
-      target = ref.delete_prefix("#/").split("/").reduce(root) { |node, key| node.fetch(key) }
+      target = LLM::Utils.split(ref.delete_prefix("#/"), "/").reduce(root) { |node, key| node.fetch(key) }
       normalize_schema(target).merge(schema.except("$ref"))
     rescue KeyError
       raise TypeError, "unresolvable schema ref #{ref.inspect}"

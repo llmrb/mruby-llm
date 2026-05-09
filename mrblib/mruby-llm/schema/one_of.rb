@@ -25,7 +25,7 @@ class LLM::Schema
     ##
     # @return [Hash]
     def to_h
-      super.merge!(oneOf: serialize(@values))
+      super.merge!(oneOf: @values)
     end
   end
 end

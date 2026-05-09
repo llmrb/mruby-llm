@@ -91,7 +91,7 @@ class LLM::Schema
     ##
     # @return [Boolean]
     def required?
-      @required
+      !!@required
     end
 
     ##

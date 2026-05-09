@@ -30,22 +30,19 @@
 #    property :address, Address, "Person's address", required: true
 #  end
 class LLM::Schema
-
-  @__monitor = Monitor.new
   extend LLM::Schema::Parser
 
   ##
   # @api private
   module Utils
     extend self
-
     def resolve(schema, type)
       if LLM::Schema::Leaf === type
         type
       elsif Class === type && type.respond_to?(:object)
         type.object
       else
-        target = type.name.split("::").last.downcase
+        target = LLM::Utils.split(type.name, "::").last.downcase
         schema.public_send(target)
       end
     end
@@ -99,8 +96,10 @@ class LLM::Schema
   ##
   # @api private
   def self.lock(&)
+    @__monitor ||= Monitor.new
     @__monitor.synchronize(&)
   end
+
   ##
   # Returns an object
   # @param [Hash] properties A hash of properties

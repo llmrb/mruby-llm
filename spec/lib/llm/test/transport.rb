@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module SpecSupport
-  class FixtureTransport
+module LLM::Test
+  class Transport
     Route = Struct.new(:fixture, :code, :headers, keyword_init: true)
 
     attr_reader :requests
@@ -16,9 +16,9 @@ module SpecSupport
     def stub(method, path, fixture:, code: 200, headers: {"content-type" => "application/json"})
       key = [method.to_s.upcase, path.to_s]
       (@routes[key] ||= []) << Route.new(
-        fixture: fixture,
-        code: code,
-        headers: headers
+        fixture:,
+        code:,
+        headers:
       )
       self
     end

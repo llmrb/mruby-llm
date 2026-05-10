@@ -2,6 +2,9 @@
 
 describe "LLM::Stream" do
   let(:stream) { LLM::Stream.new }
+  let(:ctx) { LLM::Context.new(LLM.openai(key: "test"), model: "gpt-4.1") }
+  let(:compactor) { LLM::Compactor.new(ctx) }
+  let(:transformer) { Object.new }
   let(:tool) do
     LLM::Function.new("system").tap do |fn|
       fn.id = "call_1"
@@ -39,6 +42,30 @@ describe "LLM::Stream" do
     end
   end
 
+  describe "#on_compaction" do
+    it "returns nil" do
+      expect(stream.on_compaction(ctx, compactor)).must_be_nil
+    end
+  end
+
+  describe "#on_transform" do
+    it "returns nil" do
+      expect(stream.on_transform(ctx, transformer)).must_be_nil
+    end
+  end
+
+  describe "#on_transform_finish" do
+    it "returns nil" do
+      expect(stream.on_transform_finish(ctx, transformer)).must_be_nil
+    end
+  end
+
+  describe "#on_compaction_finish" do
+    it "returns nil" do
+      expect(stream.on_compaction_finish(ctx, compactor)).must_be_nil
+    end
+  end
+
   describe "#tool_not_found" do
     it "returns an in-band error" do
       expect(stream.tool_not_found(tool).to_h).must_equal(
@@ -70,6 +97,18 @@ describe "LLM::Stream" do
     it "returns a lazy queue" do
       expect(queue).must_be_instance_of LLM::Stream::Queue
       expect(queue).must_equal stream.queue
+    end
+  end
+
+  describe "#wait" do
+    before do
+      stream.queue << stream.tool_not_found(tool)
+    end
+
+    it "forwards to the queue" do
+      expect(stream.wait(:call).map(&:to_h)).must_equal([
+        {id: "call_1", name: "system", value: {error: true, type: "LLM::NoSuchToolError", message: "tool not found"}}
+      ])
     end
   end
 end

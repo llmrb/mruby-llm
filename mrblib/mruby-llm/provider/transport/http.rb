@@ -104,9 +104,6 @@ class LLM::Provider
         end
         response ||= Net::HTTPResponse.from_http(raw)
         body = decoder.body
-        if response.code.to_i == 0 && !response.headers.empty?
-          response = Net::HTTPOK.new(200, response.headers, response.body)
-        end
         response.body = (Hash === body || Array === body) ? LLM::Object.from(body) : body
         response
       ensure

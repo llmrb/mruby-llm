@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
-class LLM::Provider
+class LLM::Transport
   ##
-  # Internal request interruption methods for
-  # {LLM::Provider::Transport::HTTP}.
+  # Internal request interruption methods for {LLM::Transport::Curl}.
   #
   # This module tracks active requests by execution owner and provides
   # the logic used to interrupt an in-flight request by closing the
   # active HTTP connection.
   #
   # @api private
-  module Transport::HTTP::Interruptible
+  module Curl::Interruptible
     INTERRUPT_ERRORS = [::IOError, ::EOFError].freeze
     ActiveRequest = Struct.new(:curl, keyword_init: true)
 
@@ -75,4 +74,4 @@ class LLM::Provider
   end
 end
 
-LLM::Provider::Transport::HTTP.include(LLM::Provider::Transport::HTTP::Interruptible)
+LLM::Transport::Curl.include(LLM::Transport::Curl::Interruptible)

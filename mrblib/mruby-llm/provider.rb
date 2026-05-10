@@ -6,7 +6,6 @@
 #
 # @abstract
 class LLM::Provider
-
   ##
   # @param [String, nil] key
   #  The secret key for authentication
@@ -22,7 +21,7 @@ class LLM::Provider
   #  Optional base path prefix for HTTP API routes.
   # @param [Boolean] persistent
   #  Whether to enable the transport's persistence mode, if supported.
-  # @param [LLM::Provider::Transport, nil] transport
+  # @param [LLM::Transport, nil] transport
   #  Optional transport override used to execute requests.
   def initialize(key:, host:, port: 443, timeout: 60, ssl: true, base_path: "", persistent: false, transport: nil)
     @key = key
@@ -32,7 +31,7 @@ class LLM::Provider
     @ssl = ssl
     @base_path = normalize_base_path(base_path)
     @headers = {"User-Agent" => "llm.rb v#{LLM::VERSION}"}
-    @transport = transport || Transport::HTTP.new(host:, port:, timeout:, ssl:, persistent:)
+    @transport = transport || LLM::Transport::Curl.new(host:, port:, timeout:, ssl:, persistent:)
     @monitor = Monitor.new
   end
 
@@ -351,6 +350,12 @@ class LLM::Provider
   end
 
   ##
+  # @return [Class]
+  def stream_decoder
+    LLM::Transport::StreamDecoder
+  end
+
+  ##
   # Resolves tools to their function representations
   # @param [Array<LLM::Function, LLM::Tool>] tools
   #  The tools to map
@@ -374,5 +379,4 @@ class LLM::Provider
   def lock(&)
     @monitor.synchronize(&)
   end
-
 end

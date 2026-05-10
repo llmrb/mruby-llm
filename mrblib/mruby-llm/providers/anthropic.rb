@@ -122,7 +122,7 @@ module LLM
       messages = build_complete_messages(prompt, params, role)
       payload = adapt(messages)
       body = LLM.json.dump(payload.merge!(params))
-      req = Net::HTTP::Post.new("/v1/messages", headers)
+      req = LLM::Transport::Request.post("/v1/messages", headers)
       set_body_stream(req, StringIO.new(body))
       req
     end

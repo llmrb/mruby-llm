@@ -3,15 +3,13 @@
 module LLM::MCP::Transport
   class HTTP
 
-    def initialize(url:, headers: {}, timeout: nil)
+    def initialize(url:, headers: {}, timeout: nil, transport: nil)
       @uri = LLM::URI.parse(url)
       @headers = headers
-      @timeout = timeout
+      @transport = resolve_transport(transport, timeout: timeout)
       @queue = []
       @monitor = Monitor.new
       @running = false
-      @curl = Curl.new
-      @curl.timeout = timeout if timeout && @curl.respond_to?(:timeout=)
     end
 
     def start
@@ -32,33 +30,13 @@ module LLM::MCP::Transport
 
     def write(message)
       raise LLM::MCP::Error, "MCP transport is not running" unless running?
-      request = ::HTTP::Request.new
-      request.method = "POST"
+      request = Net::HTTP::Post.new(uri.request_uri, headers.merge("content-type" => "application/json"))
       request.body = LLM.json.dump(message)
-      if request.respond_to?(:headers) && Hash === request.headers
-        request.headers["content-type"] = "application/json"
-        headers.each { request.headers[_1] = _2 }
+      response = transport.request(request, owner: self) do |res|
+        read(res)
+        res
       end
-
-      raw = @curl.send(uri.to_s, request)
-      response = Net::HTTPResponse.from_http(raw)
-      unless response.code.to_i.between?(200, 299)
-        raise LLM::MCP::Error, "MCP transport write failed with HTTP #{response.code}"
-      end
-
-      content_type = response["content-type"].to_s
-      if content_type.include?("text/event-stream")
-        parser = LLM::EventStream::Parser.new
-        parser.register EventHandler.new { enqueue(_1) }
-        parser << response.body.to_s
-        parser.free
-      else
-        payload = response.body.to_s
-        enqueue(LLM.json.load(payload)) unless payload.empty?
-      end
-    ensure
-      @response = nil
-      @stream_parser = nil
+      raise LLM::MCP::Error, "MCP transport write failed with HTTP #{response.code}" unless Net::HTTPSuccess === response
     end
 
     def read_nonblock
@@ -80,7 +58,33 @@ module LLM::MCP::Transport
 
     private
 
-    attr_reader :uri, :headers, :timeout
+    attr_reader :uri, :headers, :transport
+
+    def resolve_transport(transport, timeout:)
+      return default_transport(timeout: timeout) if transport.nil?
+      if Class === transport && transport <= LLM::Transport
+        return transport.new(host: uri.host, port: uri.port, timeout: timeout, ssl: uri.scheme == "https")
+      end
+      transport
+    end
+
+    def default_transport(timeout:)
+      LLM::Transport::Curl.new(host: uri.host, port: uri.port, timeout: timeout, ssl: uri.scheme == "https")
+    end
+
+    def read(response)
+      if response["content-type"].to_s.include?("text/event-stream")
+        parser = LLM::EventStream::Parser.new
+        parser.register EventHandler.new { enqueue(_1) }
+        response.read_body { parser << _1 }
+        parser.free
+      else
+        payload = +""
+        response.read_body { payload << _1 }
+        enqueue(LLM.json.load(payload)) unless payload.empty?
+      end
+    end
+
     def enqueue(message)
       lock { @queue << message }
     end

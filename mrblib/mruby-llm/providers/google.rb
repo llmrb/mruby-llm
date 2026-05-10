@@ -44,7 +44,7 @@ module LLM
     def embed(input, model: "gemini-embedding-001", **params)
       model = model.respond_to?(:id) ? model.id : model
       path = ["/v1beta/models/#{model}", "embedContent?key=#{@key}"].join(":")
-      req = Net::HTTP::Post.new(path, headers)
+      req = LLM::Transport::Request.post(path, headers)
       req.body = LLM.json.dump({content: {parts: [{text: input}]}})
       res, span, tracer = execute(request: req, operation: "embeddings", model:)
       res = ResponseAdapter.adapt(res, type: :embedding)
@@ -169,7 +169,7 @@ module LLM
       action = stream ? "streamGenerateContent?key=#{@key}&alt=sse" : "generateContent?key=#{@key}"
       model.respond_to?(:id) ? model.id : model
       path = ["/v1beta/models/#{model}", action].join(":")
-      req  = Net::HTTP::Post.new(path, headers)
+      req  = LLM::Transport::Request.post(path, headers)
       messages = build_complete_messages(prompt, params, role)
       body = LLM.json.dump({contents: adapt(messages)}.merge!(params))
       set_body_stream(req, StringIO.new(body))

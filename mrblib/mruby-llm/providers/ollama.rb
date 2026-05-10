@@ -41,7 +41,7 @@ module LLM
     # @return [LLM::Response]
     def embed(input, model: default_model, **params)
       params   = {model:}.merge!(params)
-      req      = Net::HTTP::Post.new("/v1/embeddings", headers)
+      req      = LLM::Transport::Request.post("/v1/embeddings", headers)
       req.body = LLM.json.dump({input:}.merge!(params))
       res, span, tracer = execute(request: req, operation: "embeddings", model:)
       res = ResponseAdapter.adapt(res, type: :embedding)
@@ -122,7 +122,7 @@ module LLM
     def build_complete_request(prompt, params, role)
       messages = build_complete_messages(prompt, params, role)
       body = LLM.json.dump({messages: [adapt(messages)].flatten}.merge!(params))
-      req = Net::HTTP::Post.new("/api/chat", headers)
+      req = LLM::Transport::Request.post("/api/chat", headers)
       set_body_stream(req, StringIO.new(body))
       req
     end

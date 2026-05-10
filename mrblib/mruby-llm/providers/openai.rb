@@ -39,7 +39,7 @@ module LLM
     # @raise (see LLM::Provider#request)
     # @return (see LLM::Provider#embed)
     def embed(input, model: "text-embedding-3-small", **params)
-      req = Net::HTTP::Post.new(path("/embeddings"), headers)
+      req = LLM::Transport::Request.post(path("/embeddings"), headers)
       req.body = LLM.json.dump({input:, model:}.merge!(params))
       res, span, tracer = execute(request: req, operation: "embeddings", model:)
       res = ResponseAdapter.adapt(res, type: :embedding)
@@ -177,7 +177,7 @@ module LLM
     def build_complete_request(prompt, params, role)
       messages = build_complete_messages(prompt, params, role)
       body = LLM.json.dump({messages: adapt(messages, mode: :complete).flatten}.merge!(params))
-      req = Net::HTTP::Post.new(completions_path, headers)
+      req = LLM::Transport::Request.post(completions_path, headers)
       set_body_stream(req, StringIO.new(body))
       [req, messages]
     end

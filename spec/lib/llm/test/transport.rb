@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module LLM::Test
-  class Transport
+  class Transport < LLM::Transport
     Route = Struct.new(:fixture, :code, :headers, keyword_init: true)
 
     attr_reader :requests
@@ -23,7 +23,7 @@ module LLM::Test
       self
     end
 
-    def perform(request, owner:, stream: nil, stream_parser: nil)
+    def request(request, owner:, stream: nil, &)
       @requests << capture_request(request)
       routes = @routes.fetch([request.method, request.path]) do
         raise "no fixture stub for #{request.method} #{request.path}"
@@ -32,9 +32,10 @@ module LLM::Test
       raise "no remaining fixture stubs for #{request.method} #{request.path}" unless route
       body = File.read(File.join(@root, route.fixture))
       if stream
-        perform_streaming(route, body, stream, stream_parser)
+        perform_streaming(route, body, stream)
       else
-        Net::HTTPResponse.classify(route.code).new(route.code, route.headers, body)
+        response = Net::HTTPResponse.classify(route.code).new(route.code, route.headers, body)
+        block_given? && Net::HTTPSuccess === response ? yield(response) : response
       end
     end
 
@@ -66,9 +67,9 @@ module LLM::Test
 
     private
 
-    def perform_streaming(route, body, stream, stream_parser)
+    def perform_streaming(route, body, stream)
       response = Net::HTTPResponse.classify(route.code).new(route.code, route.headers, "")
-      decoder = LLM::Provider::Transport::HTTP::StreamDecoder.new(stream_parser.new(stream))
+      decoder = stream.decoder.new(stream.parser.new(stream.streamer))
       decoder << body
       parsed = decoder.body
       response.body = (Hash === parsed || Array === parsed) ? LLM::Object.from(parsed) : parsed

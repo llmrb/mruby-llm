@@ -1,0 +1,5 @@
+data: {"id":"chatcmpl_tool_stream_fixture","model":"gpt-4.1","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_SlEPR82Y3H6rDkdney2ZxXFU","type":"function","function":{"name":"system","arguments":"{\"command\":\"date\"}"}}]}}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":12,"completion_tokens":6,"total_tokens":18}}
+
+data: [DONE]

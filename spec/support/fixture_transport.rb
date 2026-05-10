@@ -14,7 +14,8 @@ module SpecSupport
     end
 
     def stub(method, path, fixture:, code: 200, headers: {"content-type" => "application/json"})
-      @routes[[method.to_s.upcase, path.to_s]] = Route.new(
+      key = [method.to_s.upcase, path.to_s]
+      (@routes[key] ||= []) << Route.new(
         fixture: fixture,
         code: code,
         headers: headers
@@ -24,9 +25,11 @@ module SpecSupport
 
     def perform(request, owner:, stream: nil, stream_parser: nil)
       @requests << capture_request(request)
-      route = @routes.fetch([request.method, request.path]) do
+      routes = @routes.fetch([request.method, request.path]) do
         raise "no fixture stub for #{request.method} #{request.path}"
       end
+      route = routes.shift
+      raise "no remaining fixture stubs for #{request.method} #{request.path}" unless route
       body = File.read(File.join(@root, route.fixture))
       if stream
         perform_streaming(route, body, stream, stream_parser)

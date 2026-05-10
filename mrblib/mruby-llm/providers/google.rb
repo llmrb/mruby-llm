@@ -172,7 +172,7 @@ module LLM
       req  = LLM::Transport::Request.post(path, headers)
       messages = build_complete_messages(prompt, params, role)
       body = LLM.json.dump({contents: adapt(messages)}.merge!(params))
-      set_body_stream(req, StringIO.new(body))
+      transport.set_body_stream(req, StringIO.new(body))
       req
     end
 

@@ -22,8 +22,7 @@ class LLM::Transport
     # @param [String] chunk
     # @return [void]
     def <<(chunk)
-      @buffer << chunk
-      each_line { handle_line(_1) }
+      append_decoded(chunk)
     end
 
     ##
@@ -42,6 +41,11 @@ class LLM::Transport
     end
 
     private
+
+    def append_decoded(chunk)
+      @buffer << chunk
+      each_line { handle_line(_1) }
+    end
 
     def handle_line(line)
       if line == "\n" || line == "\r\n"
@@ -149,7 +153,7 @@ class LLM::Transport
           break
         end
         break if @raw.bytesize < @chunk_bytes + 2
-        super(@raw.byteslice(0, @chunk_bytes))
+        append_decoded(@raw.byteslice(0, @chunk_bytes))
         @raw = @raw.byteslice(@chunk_bytes + 2..) || +""
         @chunk_bytes = nil
       end

@@ -16,14 +16,6 @@
 class LLM::MCP
   include RPC
 
-  @clients = {}
-
-  ##
-  # @api private
-  def self.clients
-    @clients
-  end
-
   ##
   # Builds an MCP client that uses the stdio transport.
   # @param [LLM::Provider, nil] llm

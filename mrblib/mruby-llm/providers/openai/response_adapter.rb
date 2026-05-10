@@ -6,13 +6,13 @@ class LLM::OpenAI
   module ResponseAdapter
 
     ##
-    # @param [LLM::Response, Net::HTTPResponse] res
+    # @param [LLM::Response, LLM::Transport::Response] res
     # @param [Symbol] type
     # @return [LLM::Response]
     def self.adapt(res, type:)
-      response = (LLM::Response === res) ? res : LLM::Response.new(res)
+      res = (LLM::Response === res) ? res : LLM::Response.new(res)
       adapter = select(type)
-      response.extend(adapter)
+      res.extend(adapter)
     end
 
     ##

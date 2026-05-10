@@ -19,10 +19,10 @@ class LLM::Transport
 
   ##
   # Performs a request through the transport.
-  # @param [Net::HTTPRequest] request
+  # @param [LLM::Transport::Request] request
   # @param [Object] owner
   # @param [LLM::Object, nil] stream
-  # @yieldparam [Net::HTTPResponse] response
+  # @yieldparam [LLM::Transport::Response] response
   # @return [Object]
   def request(request, owner:, stream: nil, &)
     raise NotImplementedError, "#{self.class} must implement #request"
@@ -59,7 +59,7 @@ class LLM::Transport
   end
 
   ##
-  # @param [Net::HTTPRequest] request
+  # @param [LLM::Transport::Request] request
   # @param [IO] io
   # @return [void]
   def set_body_stream(request, io)

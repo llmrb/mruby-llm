@@ -11,17 +11,17 @@ module LLM
   # specialized behavior.
   #
   # The normalized response still keeps the original
-  # {Net::HTTPResponse Net::HTTPResponse} available through {#res}
+  # transport response available through {#res}
   # when callers need direct access to raw HTTP details such as
   # headers, status codes, or unadapted bodies.
   class Response
     ##
     # Returns the HTTP response
-    # @return [Net::HTTPResponse]
+    # @return [LLM::Transport::Response]
     attr_reader :res
 
     ##
-    # @param [Net::HTTPResponse] res
+    # @param [LLM::Transport::Response] res
     #  HTTP response
     # @return [LLM::Response]
     #  Returns an instance of LLM::Response
@@ -49,7 +49,7 @@ module LLM
     # Returns true if the response is successful
     # @return [Boolean]
     def ok?
-      Net::HTTPSuccess === @res
+      @res.ok?
     end
 
     ##

@@ -40,7 +40,7 @@ class LLM::OpenAI
     # @return [LLM::Response]
     def all(**params)
       query = LLM::URI.encode_www_form(params)
-      req = Net::HTTP::Get.new(path("/files?#{query}"), headers)
+      req = LLM::Transport::Request.get(path("/files?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :enumerable)
       tracer.on_request_finish(operation: "request", res:, span:)
@@ -60,9 +60,9 @@ class LLM::OpenAI
     # @return [LLM::Response]
     def create(file:, purpose: "assistants", **params)
       multi = LLM::Multipart.new(params.merge!(file: LLM.File(file), purpose:))
-      req = Net::HTTP::Post.new(path("/files"), headers)
+      req = LLM::Transport::Request.post(path("/files"), headers)
       req["content-type"] = multi.content_type
-      set_body_stream(req, multi.body)
+      transport.set_body_stream(req, multi.body)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :file)
       tracer.on_request_finish(operation: "request", res:, span:)
@@ -83,7 +83,7 @@ class LLM::OpenAI
     def get(file:, **params)
       file_id = file.respond_to?(:id) ? file.id : file
       query = LLM::URI.encode_www_form(params)
-      req = Net::HTTP::Get.new(path("/files/#{file_id}?#{query}"), headers)
+      req = LLM::Transport::Request.get(path("/files/#{file_id}?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :file)
       tracer.on_request_finish(operation: "request", res:, span:)
@@ -105,7 +105,7 @@ class LLM::OpenAI
     def download(file:, **params)
       query = LLM::URI.encode_www_form(params)
       file_id = file.respond_to?(:id) ? file.id : file
-      req = Net::HTTP::Get.new(path("/files/#{file_id}/content?#{query}"), headers)
+      req = LLM::Transport::Request.get(path("/files/#{file_id}/content?#{query}"), headers)
       io = StringIO.new("".b)
       res, span, tracer = execute(request: req, operation: "request") { |res| res.read_body { |chunk| io << chunk } }
       res = LLM::Response.new(res).tap { _1.define_singleton_method(:file) { io } }
@@ -125,7 +125,7 @@ class LLM::OpenAI
     # @return [LLM::Response]
     def delete(file:)
       file_id = file.respond_to?(:id) ? file.id : file
-      req = Net::HTTP::Delete.new(path("/files/#{file_id}"), headers)
+      req = LLM::Transport::Request.delete(path("/files/#{file_id}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = LLM::Response.new(res)
       tracer.on_request_finish(operation: "request", res:, span:)
@@ -134,7 +134,7 @@ class LLM::OpenAI
 
     private
 
-    [:path, :headers, :execute, :set_body_stream].each do |m|
+    [:path, :headers, :execute, :transport].each do |m|
       define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
     end
   end

@@ -63,15 +63,15 @@ class LLM::Transport
     end
 
     ##
-    # Performs a request through Curl and returns a Net::HTTPResponse-like
+    # Performs a request through Curl and returns a transport response
     # wrapper so the provider layer can stay transport-agnostic.
     def request(request, owner:, stream: nil, &b)
       set_request(ActiveRequest.new(curl: @curl), owner)
       if stream
         perform_streaming(request, owner, stream)
       elsif b
-        response = perform_request(request)
-        Net::HTTPSuccess === response ? b.call(response) : response
+        res = perform_request(request)
+        res.success? ? b.call(res) : res
       else
         perform_request(request)
       end
@@ -90,23 +90,23 @@ class LLM::Transport
     attr_reader :host, :port, :timeout, :ssl
 
     def perform_request(request)
-      Net::HTTPResponse.from_http(@curl.send(request_url(request), build_http_request(request)))
+      LLM::Transport::Response.from(@curl.send(request_url(request), build_http_request(request)))
     end
 
     def perform_streaming(request, owner, stream)
-      response = nil
+      res = nil
       decoder_class = stream.decoder == LLM::Transport::StreamDecoder ? LLM::Transport::Curl::StreamDecoder : stream.decoder
       decoder = decoder_class.new(stream.parser.new(stream.streamer))
       raw = @curl.send(request_url(request), build_http_request(request)) do |header, chunk|
         raise LLM::Interrupt, "request interrupted" if interrupted?(owner)
-        response ||= Net::HTTPResponse.from_http(header)
-        decoder.chunked = response["transfer-encoding"].to_s.downcase.include?("chunked") if decoder.respond_to?(:chunked=)
+        res ||= LLM::Transport::Response.from(header)
+        decoder.chunked = res["transfer-encoding"].to_s.downcase.include?("chunked") if decoder.respond_to?(:chunked=)
         decoder << chunk
       end
-      response ||= Net::HTTPResponse.from_http(raw)
+      res ||= LLM::Transport::Response.from(raw)
       body = decoder.body
-      response.body = (Hash === body || Array === body) ? LLM::Object.from(body) : body
-      response
+      res.body = (Hash === body || Array === body) ? LLM::Object.from(body) : body
+      res
     ensure
       decoder&.free
     end
@@ -139,7 +139,10 @@ class LLM::Transport
     def request_url(request)
       path = request.path
       return path if path.start_with?("http://", "https://")
-      "#{ssl ? "https" : "http"}://#{host}:#{port}#{path}"
+      scheme = ssl ? "https" : "http"
+      default_port = ssl ? 443 : 80
+      authority = port && port.to_i > 0 && port.to_i != default_port ? "#{host}:#{port}" : host
+      "#{scheme}://#{authority}#{path}"
     end
 
     def lock(&)

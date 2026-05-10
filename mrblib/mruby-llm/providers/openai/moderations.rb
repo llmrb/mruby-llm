@@ -47,7 +47,7 @@ class LLM::OpenAI
     # @param [String, LLM::Model] model The model to use
     # @return [LLM::Response]
     def create(input:, model: "omni-moderation-latest", **params)
-      req = Net::HTTP::Post.new(path("/moderations"), headers)
+      req = LLM::Transport::Request.post(path("/moderations"), headers)
       input = RequestAdapter::Moderation.new(input).adapt
       req.body = LLM.json.dump({input:, model:}.merge!(params))
       res, span, tracer = execute(request: req, operation: "request")

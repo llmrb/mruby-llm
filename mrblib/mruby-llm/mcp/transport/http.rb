@@ -30,13 +30,11 @@ module LLM::MCP::Transport
 
     def write(message)
       raise LLM::MCP::Error, "MCP transport is not running" unless running?
-      request = Net::HTTP::Post.new(uri.request_uri, headers.merge("content-type" => "application/json"))
-      request.body = LLM.json.dump(message)
-      response = transport.request(request, owner: self) do |res|
-        read(res)
-        res
-      end
-      raise LLM::MCP::Error, "MCP transport write failed with HTTP #{response.code}" unless Net::HTTPSuccess === response
+      req = LLM::Transport::Request.post(uri.request_uri, headers.merge("content-type" => "application/json"))
+      req.body = LLM.json.dump(message)
+      res = transport.request(req, owner: self)
+      read(res) if res.success?
+      raise LLM::MCP::Error, "MCP transport write failed with HTTP #{res.code}" unless res.success?
     end
 
     def read_nonblock
@@ -72,15 +70,15 @@ module LLM::MCP::Transport
       LLM::Transport::Curl.new(host: uri.host, port: uri.port, timeout: timeout, ssl: uri.scheme == "https")
     end
 
-    def read(response)
-      if response["content-type"].to_s.include?("text/event-stream")
+    def read(res)
+      if res["content-type"].to_s.include?("text/event-stream")
         parser = LLM::EventStream::Parser.new
         parser.register EventHandler.new { enqueue(_1) }
-        response.read_body { parser << _1 }
+        res.read_body { parser << _1 }
         parser.free
       else
         payload = +""
-        response.read_body { payload << _1 }
+        res.read_body { payload << _1 }
         enqueue(LLM.json.load(payload)) unless payload.empty?
       end
     end

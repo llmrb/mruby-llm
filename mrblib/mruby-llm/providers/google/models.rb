@@ -39,7 +39,7 @@ class LLM::Google
     # @return [LLM::Response]
     def all(**params)
       query = LLM::URI.encode_www_form(params.merge!(key: key))
-      req = Net::HTTP::Get.new("/v1beta/models?#{query}", headers)
+      req = LLM::Transport::Request.get("/v1beta/models?#{query}", headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :models)
       tracer.on_request_finish(operation: "request", res:, span:)

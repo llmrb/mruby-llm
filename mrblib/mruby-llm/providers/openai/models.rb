@@ -39,7 +39,7 @@ class LLM::OpenAI
     # @return [LLM::Response]
     def all(**params)
       query = LLM::URI.encode_www_form(params)
-      req = Net::HTTP::Get.new(path("/models?#{query}"), headers)
+      req = LLM::Transport::Request.get(path("/models?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :models)
       tracer.on_request_finish(operation: "request", res:, span:)
@@ -48,7 +48,7 @@ class LLM::OpenAI
 
     private
 
-    [:path, :headers, :execute, :set_body_stream].each do |m|
+    [:path, :headers, :execute, :transport].each do |m|
       define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
     end
   end

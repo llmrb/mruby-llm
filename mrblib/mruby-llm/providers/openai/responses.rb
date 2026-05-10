@@ -39,11 +39,11 @@ class LLM::OpenAI
       params = [params, adapt_schema(params), adapt_tools(tools)].inject({}, &:merge!).compact
       role, stream = params.delete(:role), params.delete(:stream)
       params[:stream] = true if @provider.streamable?(stream) || stream == true
-      req = Net::HTTP::Post.new(path("/responses"), headers)
+      req = LLM::Transport::Request.post(path("/responses"), headers)
       messages = build_complete_messages(prompt, params, role)
       @provider.tracer.set_request_metadata(user_input: extract_user_input(messages, fallback: prompt))
       body = LLM.json.dump({input: [adapt(messages, mode: :response)].flatten}.merge!(params))
-      set_body_stream(req, StringIO.new(body))
+      transport.set_body_stream(req, StringIO.new(body))
       res, span, tracer = execute(request: req, stream:, stream_parser:, operation: "chat", model: params[:model])
       res = ResponseAdapter.adapt(res, type: :responds)
         .extend(Module.new { define_method(:__tools__) { tools } })
@@ -60,7 +60,7 @@ class LLM::OpenAI
     def get(response, **params)
       response_id = response.respond_to?(:id) ? response.id : response
       query = LLM::URI.encode_www_form(params)
-      req = Net::HTTP::Get.new(path("/responses/#{response_id}?#{query}"), headers)
+      req = LLM::Transport::Request.get(path("/responses/#{response_id}?#{query}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = ResponseAdapter.adapt(res, type: :responds)
       tracer.on_request_finish(operation: "request", res:, span:)
@@ -75,7 +75,7 @@ class LLM::OpenAI
     # @return [LLM::Object] Response body
     def delete(response)
       response_id = response.respond_to?(:id) ? response.id : response
-      req = Net::HTTP::Delete.new(path("/responses/#{response_id}"), headers)
+      req = LLM::Transport::Request.delete(path("/responses/#{response_id}"), headers)
       res, span, tracer = execute(request: req, operation: "request")
       res = LLM::Response.new(res)
       tracer.on_request_finish(operation: "request", res:, span:)
@@ -84,7 +84,7 @@ class LLM::OpenAI
 
     private
 
-    [:path, :headers, :execute, :set_body_stream, :resolve_tools].each do |m|
+    [:path, :headers, :execute, :transport, :resolve_tools].each do |m|
       define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
     end
 

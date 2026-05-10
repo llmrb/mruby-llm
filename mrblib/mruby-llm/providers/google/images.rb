@@ -40,7 +40,7 @@ class LLM::Google
     # @raise (see LLM::Provider#request)
     # @return [LLM::Response]
     def create(prompt:, n: 1, image_size: nil, aspect_ratio: nil, person_generation: nil, model: "imagen-4.0-generate-001", **params)
-      req  = Net::HTTP::Post.new("/v1beta/models/#{model}:predict?key=#{key}", headers)
+      req  = LLM::Transport::Request.post("/v1beta/models/#{model}:predict?key=#{key}", headers)
       body = LLM.json.dump({
         parameters: {
           sampleCount: n,
@@ -91,7 +91,7 @@ class LLM::Google
       @provider.instance_variable_get(:@key)
     end
 
-    [:headers, :execute, :set_body_stream].each do |m|
+    [:headers, :execute, :transport].each do |m|
       define_method(m) { |*args, **kwargs, &b| @provider.send(m, *args, **kwargs, &b) }
     end
   end

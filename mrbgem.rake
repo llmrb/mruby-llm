@@ -8,8 +8,10 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
     mrblib/mruby-llm/monitor.rb
     mrblib/mruby-llm.rb
     mrblib/mruby-llm/yaml.rb
+    mrblib/mruby-llm/uri/parsed.rb
     mrblib/mruby-llm/uri.rb
-    mrblib/net/http.rb
+    mrblib/mruby-llm/transport/request.rb
+    mrblib/mruby-llm/transport/response.rb
     mrblib/mruby-llm/error.rb
     mrblib/mruby-llm/hash.rb
     mrblib/mruby-llm/utils.rb

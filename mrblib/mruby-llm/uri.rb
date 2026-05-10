@@ -13,7 +13,7 @@ module LLM
   # This is not a complete URI implementation. It currently exists to support:
   #
   # - query-string generation through {.encode_www_form}
-  # - simple string passthrough parsing through {.parse}
+  # - simple parsing through {.parse}
   # - percent-escaping through {.escape}
   module URI
     ##
@@ -30,14 +30,11 @@ module LLM
     ##
     # Parse a URI-like value for the mruby transport layer.
     #
-    # In the mruby port this currently acts as a string passthrough because
-    # callers only need a normalized string URL.
-    #
     # @param [#to_s] value
     #  The URI-like value
-    # @return [String]
+    # @return [LLM::URI::Parsed]
     def self.parse(value)
-      value.to_s
+      Parsed.new(value)
     end
 
     ##

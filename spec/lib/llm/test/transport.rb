@@ -34,8 +34,8 @@ module LLM::Test
       if stream
         perform_streaming(route, body, stream)
       else
-        response = Net::HTTPResponse.classify(route.code).new(route.code, route.headers, body)
-        block_given? && Net::HTTPSuccess === response ? yield(response) : response
+        response = LLM::Transport::Response.new(route.code, route.headers, body)
+        block_given? && response.success? ? yield(response) : response
       end
     end
 
@@ -68,7 +68,7 @@ module LLM::Test
     private
 
     def perform_streaming(route, body, stream)
-      response = Net::HTTPResponse.classify(route.code).new(route.code, route.headers, "")
+      response = LLM::Transport::Response.new(route.code, route.headers, "")
       decoder = stream.decoder.new(stream.parser.new(stream.streamer))
       decoder << body
       parsed = decoder.body

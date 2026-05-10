@@ -8,12 +8,12 @@ class LLM::Ollama
     module_function
 
     ##
-    # @param [LLM::Response, Net::HTTPResponse] res
+    # @param [LLM::Response, LLM::Transport::Response] res
     # @param [Symbol] type
     # @return [LLM::Response]
     def adapt(res, type:)
-      response = (LLM::Response === res) ? res : LLM::Response.new(res)
-      response.extend(select(type))
+      res = (LLM::Response === res) ? res : LLM::Response.new(res)
+      res.extend(select(type))
     end
 
     ##

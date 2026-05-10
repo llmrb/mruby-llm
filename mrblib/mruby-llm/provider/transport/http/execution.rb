@@ -10,9 +10,9 @@ class LLM::Transport
 
     ##
     # Executes a HTTP request
-    # @param [Net::HTTPRequest] request
+    # @param [LLM::Transport::Request] request
     # @param [Proc] b
-    # @return [Net::HTTPResponse]
+    # @return [LLM::Transport::Response]
     def execute(request:, operation:, stream: nil, stream_parser: self.stream_parser, model: nil, inputs: nil, &b)
       stream &&= LLM::Object.from(streamer: stream, parser: stream_parser, decoder: stream_decoder)
       owner = transport.request_owner
@@ -27,20 +27,17 @@ class LLM::Transport
 
     ##
     # Handles the response from a request
-    # @param [Net::HTTPResponse] res
+    # @param [LLM::Transport::Response] res
     # @param [Object, nil] span
-    # @return [Net::HTTPResponse]
+    # @return [LLM::Transport::Response]
     def handle_response(res, tracer, span)
-      case res
-      when Net::HTTPSuccess then res.body = parse_response(res)
-      else error_handler.new(tracer, span, res).raise_error!
-      end
+      res.success? ? res.body = parse_response(res) : error_handler.new(tracer, span, res).raise_error!
       res
     end
 
     ##
     # Parse a HTTP response
-    # @param [Net::HTTPResponse] res
+    # @param [LLM::Transport::Response] res
     # @return [LLM::Object, String]
     def parse_response(res)
       case res["content-type"]

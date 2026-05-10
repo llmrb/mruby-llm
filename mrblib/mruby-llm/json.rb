@@ -13,7 +13,6 @@ module LLM::JSON
   Errors = [::JSON::ParserError].freeze
   extend self
 
-
   ##
   # Serialize a value to JSON after normalizing nested runtime objects.
   # @param [Object] value

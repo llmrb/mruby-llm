@@ -18,7 +18,7 @@ module LLM
   end
 
   def self.json
-    ::JSON
+    LLM::JSON
   end
 
   def self.function(key, &b)

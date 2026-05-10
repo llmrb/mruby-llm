@@ -13,6 +13,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
     mrblib/mruby-llm/error.rb
     mrblib/mruby-llm/hash.rb
     mrblib/mruby-llm/utils.rb
+    mrblib/mruby-llm/json.rb
     mrblib/mruby-llm/version.rb
     mrblib/mruby-llm/cost.rb
     mrblib/mruby-llm/usage.rb
@@ -70,6 +71,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
     mrblib/mruby-llm/tracer.rb
     mrblib/mruby-llm/tracer/null.rb
     mrblib/mruby-llm/provider.rb
+    mrblib/mruby-llm/provider/transport.rb
     mrblib/mruby-llm/provider/transport/http.rb
     mrblib/mruby-llm/provider/transport/http/execution.rb
     mrblib/mruby-llm/provider/transport/http/interruptible.rb

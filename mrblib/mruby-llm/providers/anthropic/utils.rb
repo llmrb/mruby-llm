@@ -16,7 +16,7 @@ class LLM::Anthropic
       else
         input.respond_to?(:to_h) ? input.to_h : {}
       end
-    rescue StandardError
+    rescue *LLM::JSON::Errors
       {}
     end
   end

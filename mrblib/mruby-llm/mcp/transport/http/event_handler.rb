@@ -28,7 +28,7 @@ module LLM::MCP::Transport
         reset
         return if payload.empty? || payload == "[DONE]"
         @on_message.call(LLM.json.load(payload))
-      rescue StandardError
+      rescue *LLM::JSON::Errors
         reset
       end
 

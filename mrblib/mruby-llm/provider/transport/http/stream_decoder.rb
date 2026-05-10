@@ -136,7 +136,7 @@ module LLM::Provider::Transport
       return if payload.empty? || payload == "[DONE]"
       chunk = LLM.json.load(payload)
       parser.parse!(chunk) if chunk
-    rescue StandardError
+    rescue *LLM::JSON::Errors
     end
 
     def each_line

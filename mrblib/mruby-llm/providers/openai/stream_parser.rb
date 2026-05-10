@@ -199,7 +199,7 @@ class LLM::OpenAI
       return nil if arguments.to_s.empty?
       parsed = LLM.json.load(arguments)
       Hash === parsed ? parsed : nil
-    rescue StandardError
+    rescue *LLM::JSON::Errors
       nil
     end
 

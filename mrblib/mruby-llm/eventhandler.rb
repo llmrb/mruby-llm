@@ -22,7 +22,7 @@ module LLM
       payload = LLM.json.load(value)
       return unless payload
       @parser.parse!(payload)
-    rescue StandardError
+    rescue *LLM::JSON::Errors
     end
 
     ##
@@ -39,7 +39,7 @@ module LLM
       payload = LLM.json.load(raw_chunk)
       return unless payload
       @parser.parse!(payload)
-    rescue StandardError
+    rescue *LLM::JSON::Errors
     end
 
     ##

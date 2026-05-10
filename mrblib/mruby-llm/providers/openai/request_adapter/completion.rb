@@ -19,7 +19,7 @@ module LLM::OpenAI::RequestAdapter
         if Hash === message
           {role: message[:role], content: adapt_content(message[:content])}
         elsif message.tool_call?
-          {role: message.role, content: nil, tool_calls: replay_tool_calls(message.extra[:original_tool_calls])}
+          {role: message.role, content: nil, tool_calls: message.extra[:original_tool_calls]}
         else
           adapt_message
         end
@@ -106,24 +106,5 @@ module LLM::OpenAI::RequestAdapter
     def message = @message
     def content = message.content
     def returns = content.grep(LLM::Function::Return)
-
-    def replay_tool_calls(tool_calls)
-      [*tool_calls].map do |tool_call|
-        tool_call = tool_call.to_h if tool_call.respond_to?(:to_h)
-        function = tool_call["function"] || tool_call[:function] || {}
-        function = function.to_h if function.respond_to?(:to_h)
-        arguments = function["arguments"] || function[:arguments] || {}
-        arguments = arguments.to_h if arguments.respond_to?(:to_h)
-
-        {
-          id: tool_call["id"] || tool_call[:id],
-          type: tool_call["type"] || tool_call[:type] || "function",
-          function: {
-            name: function["name"] || function[:name],
-            arguments: LLM.json.dump(arguments)
-          }
-        }
-      end
-    end
   end
 end

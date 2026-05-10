@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class LLM::Provider
-  module Transport
+  class Transport
     ##
     # The {LLM::Provider::Transport::HTTP LLM::Provider::Transport::HTTP}
     # class manages HTTP connections for {LLM::Provider}. The mruby port
@@ -9,7 +9,7 @@ class LLM::Provider
     # transport is being rewritten away from net/http.
     #
     # @api private
-    class HTTP
+    class HTTP < Transport
 
       ##
       # @param [String] host

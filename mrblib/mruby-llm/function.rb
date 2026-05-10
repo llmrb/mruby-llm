@@ -277,7 +277,6 @@ class LLM::Function
 
   def format_openai(provider)
     params = @params || {type: "object", properties: {}}
-    params = params.to_h if params.respond_to?(:to_h)
 
     case provider.class.to_s
     when "LLM::OpenAI::Responses"

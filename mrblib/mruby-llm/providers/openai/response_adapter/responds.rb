@@ -131,7 +131,7 @@ module LLM::OpenAI::ResponseAdapter
       return {} if arguments.to_s.empty?
       parsed = LLM.json.load(arguments)
       Hash === parsed ? parsed : {}
-    rescue StandardError
+    rescue *LLM::JSON::Errors
       {}
     end
 

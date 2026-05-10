@@ -22,7 +22,7 @@ class LLM::Provider
   #  Optional base path prefix for HTTP API routes.
   # @param [Boolean] persistent
   #  Whether to enable the transport's persistence mode, if supported.
-  # @param [Object, nil] transport
+  # @param [LLM::Provider::Transport, nil] transport
   #  Optional transport override used to execute requests.
   def initialize(key:, host:, port: 443, timeout: 60, ssl: true, base_path: "", persistent: false, transport: nil)
     @key = key

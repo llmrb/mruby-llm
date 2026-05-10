@@ -6,6 +6,7 @@ describe "LLM::Context" do
   let(:provider) { LLM.openai(key: "test-key", transport:) }
   let(:params) { {} }
   let(:ctx) { LLM::Context.new(provider, params) }
+  let(:path) { File.join(File.dirname(__FILE__), "tmp", "context.json") }
 
   context "when given a thread of messages" do
     let(:params) { {model: "gpt-4.1"} }
@@ -177,6 +178,48 @@ describe "LLM::Context" do
       expect(ctx.functions).must_be_empty
       expect(res.content).must_equal "Today's date is August 24, 2025."
       expect(ctx.messages.last.content).must_equal "Today's date is August 24, 2025."
+    end
+  end
+
+  context "when resuming a serialized conversation" do
+    let(:params) { {model: "gpt-4.1"} }
+    let(:prompt) do
+      ctx.build_prompt do
+        _1.talk "Keep your answers short and concise"
+        _1.talk "Say hello"
+      end
+    end
+    let(:restored) { LLM::Context.new(provider, params) }
+    let(:resumed_prompt) do
+      restored.build_prompt do
+        _1.talk "What did we just say?"
+      end
+    end
+
+    before do
+      transport
+        .stub("POST", "/v1/chat/completions", fixture: "openai/chat_completions.json")
+        .stub("POST", "/v1/chat/completions", fixture: "openai/chat_completions_resume.json")
+      ctx.talk(prompt)
+      ctx.serialize(path:)
+      restored.restore(path:)
+    end
+
+    after do
+      File.delete(path) if File.exist?(path)
+    end
+
+    it "restores the message history" do
+      expect(restored.messages.size).must_equal 3
+      expect(restored.messages[0].role).must_equal "user"
+      expect(restored.messages[1].role).must_equal "user"
+      expect(restored.messages[2].content).must_equal "Hello from fixture"
+    end
+
+    it "continues the conversation after restore" do
+      res = restored.talk(resumed_prompt)
+      expect(res.content).must_equal "You just said hello, and I answered Hello from fixture."
+      expect(restored.messages.last.content).must_equal "You just said hello, and I answered Hello from fixture."
     end
   end
 end

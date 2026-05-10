@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module LLM::Provider::Transport
+class LLM::Provider::Transport
   class HTTP
     ##
     # Internal HTTP request execution methods for {LLM::Provider}.

@@ -19,6 +19,7 @@ class LLM::Anthropic
       @can_emit_content = stream.respond_to?(:on_content)
       @can_emit_tool_call = stream.respond_to?(:on_tool_call)
       @can_push_content = stream.respond_to?(:<<)
+      @can_write_content = stream.respond_to?(:write)
     end
 
     ##
@@ -95,6 +96,8 @@ class LLM::Anthropic
         @stream.on_content(value)
       elsif @can_push_content
         @stream << value
+      elsif @can_write_content
+        @stream.write(value)
       end
     end
 

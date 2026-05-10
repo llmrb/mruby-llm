@@ -15,6 +15,7 @@ class LLM::Ollama
       @body = {}
       @stream = stream
       @can_push_content = stream.respond_to?(:<<)
+      @can_write_content = stream.respond_to?(:write)
     end
 
     ##
@@ -37,14 +38,22 @@ class LLM::Ollama
         if key == "message"
           if @body[key]
             @body[key]["content"] << value["content"]
-            @stream << value["content"] if @can_push_content
+            emit_content(value["content"])
           else
             @body[key] = value
-            @stream << value["content"] if @can_push_content
+            emit_content(value["content"])
           end
         else
           @body[key] = value
         end
+      end
+    end
+
+    def emit_content(value)
+      if @can_push_content
+        @stream << value
+      elsif @can_write_content
+        @stream.write(value)
       end
     end
   end

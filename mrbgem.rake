@@ -159,6 +159,10 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
     mrblib/mruby-llm/loop_guard.rb
   ].map { File.expand_path(_1, __dir__) }
 
+  if ENV["ENV"] == "TEST"
+    spec.rbfiles.concat Dir[File.expand_path("spec/support/**/*.rb", __dir__)].sort
+  end
+
   # Dependencies
   spec.add_dependency 'mruby-http',       :github => 'mattn/mruby-http'
   spec.add_dependency 'mruby-curl',       :github => 'mattn/mruby-curl'

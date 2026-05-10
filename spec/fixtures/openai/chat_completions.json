@@ -1,0 +1,23 @@
+{
+  "id": "chatcmpl_fixture",
+  "model": "gpt-4.1",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello from fixture",
+        "reasoning_content": "Think first"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 4,
+    "completion_tokens": 5,
+    "total_tokens": 9,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2
+    }
+  }
+}

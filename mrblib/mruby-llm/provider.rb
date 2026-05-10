@@ -22,7 +22,9 @@ class LLM::Provider
   #  Optional base path prefix for HTTP API routes.
   # @param [Boolean] persistent
   #  Whether to enable the transport's persistence mode, if supported.
-  def initialize(key:, host:, port: 443, timeout: 60, ssl: true, base_path: "", persistent: false)
+  # @param [Object, nil] transport
+  #  Optional transport override used to execute requests.
+  def initialize(key:, host:, port: 443, timeout: 60, ssl: true, base_path: "", persistent: false, transport: nil)
     @key = key
     @host = host
     @port = port
@@ -30,7 +32,7 @@ class LLM::Provider
     @ssl = ssl
     @base_path = normalize_base_path(base_path)
     @headers = {"User-Agent" => "llm.rb v#{LLM::VERSION}"}
-    @transport = Transport::HTTP.new(host:, port:, timeout:, ssl:, persistent:)
+    @transport = transport || Transport::HTTP.new(host:, port:, timeout:, ssl:, persistent:)
     @monitor = Monitor.new
   end
 

@@ -1,0 +1,9 @@
+data: {"id":"chatcmpl_fixture_stream","model":"gpt-4.1","choices":[{"index":0,"delta":{"reasoning_content":"Think"}}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"Hello"}}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" there"}}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":4,"completion_tokens":2,"total_tokens":6,"completion_tokens_details":{"reasoning_tokens":1}}}
+
+data: [DONE]

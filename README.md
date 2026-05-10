@@ -69,7 +69,7 @@ puts res.content
 Or at the lower-level context surface:
 
 ```ruby
-llm = LLM.openai(key: ENV["OPENAI_API_KEY"])
+llm = LLM.openai(key: ENV["OPENAI_SECRET"])
 ctx = LLM::Context.new(llm, model: "gpt-4.1-mini")
 res = ctx.talk("Return a haiku about FreeBSD.")
 puts res.content

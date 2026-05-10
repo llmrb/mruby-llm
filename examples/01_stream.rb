@@ -19,10 +19,10 @@ class Stream < LLM::Stream
   end
 end
 
-llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
-ctx = LLM::Agent.new(llm, tools: [ReadFile], stream: Stream.new)
+llm   = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
+agent = LLM::Agent.new(llm, tools: [ReadFile], stream: Stream.new)
 loop do
   print "> "
-  ctx.talk(gets)
+  agent.talk(gets)
   puts
 end

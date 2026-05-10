@@ -67,18 +67,4 @@ class LLM::Transport
     request["transfer-encoding"] = "chunked" unless request["content-length"]
   end
 
-  ##
-  # Enables persistence mode when supported.
-  # @return [LLM::Transport]
-  def persist!
-    self
-  end
-  alias_method :persistent, :persist!
-
-  ##
-  # Returns whether the transport is persistent.
-  # @return [Boolean]
-  def persistent?
-    false
-  end
 end

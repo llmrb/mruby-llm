@@ -49,20 +49,6 @@ class LLM::Transport
     end
 
     ##
-    # Persistent transport is not currently supported in the mruby port.
-    # @return [LLM::Transport::Curl]
-    def persist!
-      self
-    end
-    alias_method :persistent, :persist!
-
-    ##
-    # @return [Boolean]
-    def persistent?
-      false
-    end
-
-    ##
     # Performs a request through Curl and returns a transport response
     # wrapper so the provider layer can stay transport-agnostic.
     def request(request, owner:, stream: nil, &b)

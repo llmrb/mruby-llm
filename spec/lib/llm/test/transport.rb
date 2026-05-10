@@ -56,15 +56,6 @@ module LLM::Test
       @interrupts.delete(owner)
     end
 
-    def persist!
-      self
-    end
-    alias_method :persistent, :persist!
-
-    def persistent?
-      false
-    end
-
     private
 
     def perform_streaming(route, body, stream)

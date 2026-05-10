@@ -112,17 +112,6 @@ class LLM::MCP
   end
 
   ##
-  # Configures the transport to remain open across multiple operations.
-  # This is mainly useful for HTTP MCP transports that support session
-  # continuity.
-  # @return [LLM::MCP]
-  def persist!
-    transport.persist!
-    self
-  end
-  alias_method :persistent, :persist!
-
-  ##
   # Returns the tools provided by the MCP server.
   # @return [Array<Class<LLM::Tool>>]
   def tools

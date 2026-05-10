@@ -268,18 +268,6 @@ class LLM::Provider
   end
 
   ##
-  # This method configures a provider to use the transport's persistence mode.
-  # @example
-  #   llm = LLM.openai(key: ENV["KEY"]).persistent
-  #   # do something with 'llm'
-  # @return [LLM::Provider]
-  def persist!
-    transport.persist!
-    self
-  end
-  alias_method :persistent, :persist!
-
-  ##
   # Interrupt the active request, if any.
   # @param [Fiber] owner
   # @return [nil]

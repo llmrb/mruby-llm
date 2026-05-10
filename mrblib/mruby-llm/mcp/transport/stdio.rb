@@ -29,11 +29,6 @@ module LLM::MCP::Transport
       command.wait
     end
 
-    def persist!
-      self
-    end
-    alias_method :persistent, :persist!
-
     private
 
     attr_reader :command

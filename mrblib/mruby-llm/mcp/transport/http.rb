@@ -49,11 +49,6 @@ module LLM::MCP::Transport
       @running
     end
 
-    def persist!
-      self
-    end
-    alias_method :persistent, :persist!
-
     private
 
     attr_reader :uri, :headers, :transport

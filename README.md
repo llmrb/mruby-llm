@@ -14,7 +14,7 @@ It brings multi-provider chat, agents, tools, schemas, streaming,
 file handling, and MCP to the mruby runtime in a form that can be
 embedded into small standalone applications. The project began as
 a fork of [llm.rb](https://github.com/llmrb/llm.rb), and a large
-number of features turned out to be portable. 
+number of features turned out to be portable.
 
 ## Features
 
@@ -50,6 +50,8 @@ number of features turned out to be portable.
   Runtime tracing hooks, provider registries, and local model metadata
 
 ## Example
+
+See the [examples/](examples/) directory for more.
 
 ```ruby
 class Agent < LLM::Agent

@@ -22,18 +22,14 @@ number of features turned out to be portable.
   OpenAI, Anthropic, Google Gemini, Ollama, DeepSeek, llama.cpp, xAI, and Z.ai
 - **Contexts** <br>
   Stateful conversations, message history, params, and execution state through `LLM::Context`
-- **Messages & Buffers** <br>
-  Lower-level conversation and prompt primitives with `LLM::Message` and `LLM::Buffer`
 - **Agents** <br>
   Reusable assistants with instructions, tools, skills, schemas, and automatic tool-loop handling
-- **Skills Support** <br>
+- **Skills** <br>
   Directory-backed skills loaded from `SKILL.md`
-- **Tool Calling** <br>
+- **Tools** <br>
   Closure-based tools via `LLM.function` and class-based tools via `LLM::Tool`
 - **Structured Output** <br>
   Schema-driven outputs through `LLM::Schema`
-- **Runtime Objects** <br>
-  Nested provider data and tool payloads through `LLM::Object`
 - **Streaming** <br>
   Visible content, reasoning content, tool-call events, and queued tool returns
 - **Files** <br>

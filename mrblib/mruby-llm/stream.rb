@@ -46,11 +46,11 @@ module LLM
 
     ##
     # Waits for queued tool results and returns them.
-    # @param [Symbol] strategy
-    #  The execution strategy. mruby currently supports `:call` only.
+    # Any arguments are ignored when delegating to the queue, because queued
+    # work is resolved by the concrete items already stored there.
     # @return [Array<LLM::Function::Return>]
-    def wait(strategy = :call)
-      queue.wait(strategy)
+    def wait(*)
+      queue.wait
     end
 
     # @group Public callbacks

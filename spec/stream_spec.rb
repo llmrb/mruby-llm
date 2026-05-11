@@ -110,6 +110,12 @@ describe "LLM::Stream" do
         {id: "call_1", name: "system", value: {error: true, type: "LLM::NoSuchToolError", message: "tool not found"}}
       ])
     end
+
+    it "ignores strategy arguments when draining queued work" do
+      expect(stream.wait(:thread).map(&:to_h)).must_equal([
+        {id: "call_1", name: "system", value: {error: true, type: "LLM::NoSuchToolError", message: "tool not found"}}
+      ])
+    end
   end
 end
 

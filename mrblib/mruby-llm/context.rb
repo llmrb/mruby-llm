@@ -295,14 +295,14 @@ module LLM
     # the context's pending functions directly.
     #
     # @param [Symbol, Array<Symbol>] strategy
-    #  The concurrency strategy to use, or the possible concurrency strategies to
-    #  wait on. For example, `[:thread, :ractor]` waits for any queued thread or
-    #  ractor work, in that order.
+    #  If the stream queue already has tool work, `wait` will drain it
+    #  without using this argument.
+    #  Otherwise, this controls how pending functions are resolved directly.
     # @return [Array<LLM::Function::Return>]
     def wait(strategy)
       if LLM::Stream === stream && !stream.queue.empty?
         @queue = stream.queue
-        @queue.wait(strategy)
+        @queue.wait
       else
         return guarded_returns if guarded_returns
         @queue = functions.spawn(strategy)

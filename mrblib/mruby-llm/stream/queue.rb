@@ -38,10 +38,8 @@ class LLM::Stream
 
     ##
     # Waits for queued results and returns them.
-    # @param [Symbol] strategy
     # @return [Array<LLM::Function::Return>]
-    def wait(strategy = :call)
-      raise ArgumentError, "Unknown strategy: #{strategy.inspect}. Expected :call" unless strategy == :call
+    def wait
       returns = @items.shift(@items.length)
       returns.each do |result|
         unless LLM::Function::Return === result

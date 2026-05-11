@@ -171,17 +171,6 @@ Declared mrbgem dependencies include:
 
 See [mrbgem.rake](mrbgem.rake).
 
-## Origins
-
-### llm.rb
-
-mruby-llm implements the same overall execution model as
-[llm.rb](https://github.com/llmrb/llm.rb#readme):
-providers, contexts, agents, tools, schemas, streaming, and MCP.
-The mruby port keeps that surface where it makes sense, but adapts the
-runtime to mruby constraints such as explicit builds, smaller standard
-library surface, and a more modest concurrency story.
-
 ## License
 
 [BSD Zero Clause](https://choosealicense.com/licenses/0bsd/)

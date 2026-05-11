@@ -260,22 +260,6 @@ module LLM
       (pending && !pending.empty?) || functions.any?
     end
 
-    ##
-    # Calls a named collection of work through the context.
-    #
-    # This currently supports `:functions`, forwarding to `functions.call`.
-    #
-    # @param [Symbol] target
-    #  The work collection to call
-    # @return [Array<LLM::Function::Return>]
-    def call(target)
-      case target
-      when :functions then guarded_returns || functions.call
-      else raise ArgumentError, "Unknown target: #{target.inspect}. Expected :functions"
-      end
-    end
-
-    ##
     # Spawns a function through the context.
     #
     # When a guard is configured, this method can return an in-band guarded

@@ -96,7 +96,7 @@ mcp = LLM::MCP.stdio(argv: ["ruby", "server.rb"])
 mcp.run do
   ctx = LLM::Context.new(llm, stream: $stdout, tools: mcp.tools)
   ctx.talk("Use the available tools to inspect the environment.")
-  ctx.talk(ctx.call(:functions)) while ctx.functions?
+  ctx.talk(ctx.wait(:call)) while ctx.functions?
 end
 ```
 

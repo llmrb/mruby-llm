@@ -218,13 +218,6 @@ module LLM
     end
 
     ##
-    # @see LLM::Context#call
-    # @return [Object]
-    def call(...)
-      @tracer ? @llm.with_tracer(@tracer) { @ctx.call(...) } : @ctx.call(...)
-    end
-
-    ##
     # @see LLM::Context#wait
     # @return [Array<LLM::Function::Return>]
     def wait(...)
@@ -388,12 +381,6 @@ module LLM
       !prompt.to_a.any?(&:system?)
     end
 
-    ##
-    # @return [Array<LLM::Function::Return>]
-    def call_functions
-      call(:functions)
-    end
-
     def run_loop(method, prompt, params)
       loop = proc do
         max = params.key?(:tool_attempts) ? params.delete(:tool_attempts) : 25
@@ -406,12 +393,12 @@ module LLM
           if max
             max.times do
               break unless @ctx.functions?
-              res = @ctx.public_send(method, call_functions, params)
+              res = @ctx.public_send(method, @ctx.wait(:call), params)
             end
             break unless @ctx.functions?
             res = @ctx.public_send(method, @ctx.functions.map { rate_limit(_1) }, params)
           else
-            res = @ctx.public_send(method, call_functions, params)
+            res = @ctx.public_send(method, @ctx.wait(:call), params)
           end
         end
         res

@@ -52,7 +52,7 @@ class LLM::Compactor
   #  The next prompt or turn input
   # @return [Boolean]
   def compactable?(prompt = nil)
-    return false if ctx.functions.any? || [*prompt].grep(LLM::Function::Return).any?
+    return false if ctx.functions? || [*prompt].grep(LLM::Function::Return).any?
     messages = ctx.messages.reject(&:system?)
     return true if config[:message_threshold] && messages.size > config[:message_threshold]
     return true if token_threshold and ctx.usage.total_tokens > token_threshold
@@ -66,7 +66,7 @@ class LLM::Compactor
   #  The next prompt or turn input
   # @return [LLM::Message, nil]
   def compact!(prompt = nil)
-    return nil if ctx.functions.any? || [*prompt].grep(LLM::Function::Return).any?
+    return nil if ctx.functions? || [*prompt].grep(LLM::Function::Return).any?
     messages = ctx.messages.reject(&:system?)
     retention_window = [config[:retention_window], messages.size].min
     return nil unless messages.size > retention_window

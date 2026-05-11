@@ -113,11 +113,13 @@ describe "LLM::Context" do
 
     it "exposes pending functions" do
       expect(ctx.functions.empty?).must_equal false
+      expect(ctx.functions?).must_equal true
     end
 
     it "calls the function" do
       ctx.talk ctx.functions[0].call
       expect(ctx.functions).must_be_empty
+      expect(ctx.functions?).must_equal false
     end
 
     it "calls the functions" do

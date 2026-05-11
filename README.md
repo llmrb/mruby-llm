@@ -14,13 +14,13 @@ It brings a single runtime for providers, agents, tools, skills, MCP,
 streaming, files, and persisted state to mruby in a form that can be
 embedded into small standalone applications. The project began as
 a fork of [llm.rb](https://github.com/llmrb/llm.rb), and a large
-number of features turned out to be portable.
+number of features turned out to be portable. Both projects generally
+improve each other and code continues to flow both ways.
 
-It supports OpenAI, Anthropic, Google Gemini, DeepSeek, xAI, Z.ai,
+There is support for OpenAI, Anthropic, Google Gemini, DeepSeek, xAI, Z.ai,
 Ollama, and llama.cpp. The mruby port keeps the same overall execution
-model as llm.rb, but adapts it to mruby constraints such as explicit
-builds, a smaller standard library surface, and a more modest
-concurrency story.
+model as llm.rb, but adapts it to mruby constraints. There's still quite
+a lot of the original llm.rb runtime that is supported though. 
 
 ## Quick start
 

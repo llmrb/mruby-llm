@@ -110,6 +110,26 @@ module LLM
     end
 
     ##
+    # Set or get the default stream.
+    #
+    # When a block is provided, it is stored and evaluated lazily against the
+    # agent instance during initialization so it can build a stream from the
+    # resolved provider.
+    #
+    # @example
+    #   class Agent < LLM::Agent
+    #     stream { MyStream.new }
+    #   end
+    #
+    # @param [Object, Proc, nil] stream
+    # @yieldreturn [Object, nil]
+    # @return [Object, Proc, nil]
+    def self.stream(stream = nil, &block)
+      return @stream if stream.nil? && !block
+      @stream = block || stream
+    end
+
+    ##
     # Set or get the default tracer.
     #
     # When a block is provided, it is stored and evaluated lazily against the
@@ -140,6 +160,7 @@ module LLM
     # @option params [Array<LLM::Function>, nil] :tools Defaults to nil
     # @option params [Array<String>, nil] :skills Defaults to nil
     # @option params [#to_json, nil] :schema Defaults to nil
+    # @option params [Object, Proc, nil] :stream Optional stream override for this agent instance
     # @option params [LLM::Tracer, Proc, nil] :tracer Optional tracer override for this agent instance
     # @option params [Symbol, nil] :concurrency Defaults to the agent class concurrency
     def initialize(llm, params = {})
@@ -152,7 +173,9 @@ module LLM
       @concurrency = params.delete(:concurrency) || self.class.concurrency
       @llm = llm
       tracer = params.key?(:tracer) ? params.delete(:tracer) : self.class.tracer
+      stream = params.key?(:stream) ? params.delete(:stream) : self.class.stream
       @tracer = resolve_option(tracer) unless tracer.nil?
+      params[:stream] = resolve_option(stream) unless stream.nil?
       @ctx = LLM::Context.new(llm, defaults.merge(guard: true).merge(params))
     end
 

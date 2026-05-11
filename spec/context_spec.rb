@@ -127,6 +127,11 @@ describe "LLM::Context" do
       expect(ctx.functions).must_be_empty
     end
 
+    it "waits for functions through :call" do
+      ctx.talk ctx.wait(:call)
+      expect(ctx.functions).must_be_empty
+    end
+
     it "includes a message with a return value" do
       ctx.talk ctx.functions.map(&:call)
       expect(ctx.messages.select(&:tool_return?).size).must_equal 1

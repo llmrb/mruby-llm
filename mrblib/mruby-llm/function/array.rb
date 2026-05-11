@@ -21,10 +21,10 @@ class LLM::Function
     # Only synchronous execution is exposed in the mruby port for now.
     #
     # @param [Symbol] strategy
-    # @return [Array<LLM::Function::Return>]
+    # @return [LLM::Function::CallGroup]
     def spawn(strategy = :call)
       raise ArgumentError, "Unknown strategy: #{strategy.inspect}. Expected :call" unless strategy == :call
-      call
+      CallGroup.new(self)
     end
 
     ##

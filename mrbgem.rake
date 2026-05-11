@@ -62,6 +62,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
     mrblib/mruby-llm/buffer.rb
     mrblib/mruby-llm/function/registry.rb
     mrblib/mruby-llm/function/tracing.rb
+    mrblib/mruby-llm/function/call_group.rb
     mrblib/mruby-llm/function/array.rb
     mrblib/mruby-llm/function.rb
     mrblib/mruby-llm/stream/queue.rb

@@ -10,65 +10,119 @@
 
 mruby-llm is mruby's most capable AI runtime.
 
-It brings multi-provider chat, agents, tools, schemas, streaming,
-file handling, and MCP to the mruby runtime in a form that can be
+It brings a single runtime for providers, agents, tools, skills, MCP,
+streaming, files, and persisted state to mruby in a form that can be
 embedded into small standalone applications. The project began as
 a fork of [llm.rb](https://github.com/llmrb/llm.rb), and a large
 number of features turned out to be portable.
 
-## Features
+It supports OpenAI, Anthropic, Google Gemini, DeepSeek, xAI, Z.ai,
+Ollama, and llama.cpp. The mruby port keeps the same overall execution
+model as llm.rb, but adapts it to mruby constraints such as explicit
+builds, a smaller standard library surface, and a more modest
+concurrency story.
 
-- **Providers** <br>
-  OpenAI, Anthropic, Google Gemini, Ollama, DeepSeek, llama.cpp, xAI, and Z.ai
-- **Contexts** <br>
-  Stateful conversations, message history, params, and execution state through `LLM::Context`
-- **Agents** <br>
-  Reusable assistants with instructions, tools, skills, schemas, and automatic tool-loop handling
-- **Skills** <br>
-  Directory-backed skills loaded from `SKILL.md`
-- **Tools** <br>
-  Closure-based tools via `LLM.function` and class-based tools via `LLM::Tool`
-- **Structured Output** <br>
-  Schema-driven outputs through `LLM::Schema`
-- **Streaming** <br>
-  Visible content, reasoning content, tool-call events, and queued tool returns
-- **Files** <br>
-  Local files, remote file references, mime lookup, and multipart request helpers
-- **MCP Support** <br>
-  Stdio and HTTP MCP transports with routing, mailbox handling, and tool bridging
-- **Persistence** <br>
-  Save and restore context state across runs
-- **Context Compaction** <br>
-  Summarize older history in long-lived contexts
-- **Loop Guards** <br>
-  Detect and stop repeated tool-call execution patterns
-- **Tracing & Registries** <br>
-  Runtime tracing hooks, provider registries, and local model metadata
+## Quick start
 
-## Example
+#### LLM::Context
 
-See the [examples/](examples/) directory for more.
-
-```ruby
-class Agent < LLM::Agent
-  model "deepseek-v4"
-  instructions "Use tools when they help."
-  tools WeatherTool, CalendarTool
-end
-
-llm = LLM.deepseek(key: ENV["DEEPSEEK_SECRET"])
-agent = Agent.new(llm)
-res = agent.talk("If Tokyo is warm this Saturday, plan a picnic and put it on my calendar.")
-puts res.content
-```
-
-Or at the lower-level context surface:
+The
+[LLM::Context](https://0x1eef.github.io/x/mruby-llm/LLM/Context.html)
+object is at the heart of the runtime. Almost all other features build
+on top of it. It is a low-level interface to a model, and requires tool
+execution to be managed manually. The
+[LLM::Agent](https://0x1eef.github.io/x/mruby-llm/LLM/Agent.html)
+class is almost the same as
+[LLM::Context](https://0x1eef.github.io/x/mruby-llm/LLM/Context.html),
+but it manages tool execution for you:
 
 ```ruby
 llm = LLM.openai(key: ENV["OPENAI_SECRET"])
-ctx = LLM::Context.new(llm, model: "gpt-4.1-mini")
-res = ctx.talk("Return a haiku about FreeBSD.")
-puts res.content
+ctx = LLM::Context.new(llm, stream: $stdout)
+ctx.talk("Hello world")
+```
+
+#### LLM::Agent
+
+The
+[LLM::Agent](https://0x1eef.github.io/x/mruby-llm/LLM/Agent.html)
+object is implemented on top of
+[LLM::Context](https://0x1eef.github.io/x/mruby-llm/LLM/Context.html).
+It provides the same interface, but manages tool execution for you. It
+also includes loop guards that detect repeated tool-call patterns and
+advise the model to change course rather than raise an error:
+
+```ruby
+llm = LLM.openai(key: ENV["OPENAI_SECRET"])
+agent = LLM::Agent.new(llm, stream: $stdout)
+agent.talk("Hello world")
+```
+
+#### Tools
+
+The
+[LLM::Tool](https://0x1eef.github.io/x/mruby-llm/LLM/Tool.html)
+class can be subclassed to implement your own tools that extend the
+abilities of a model:
+
+```ruby
+class ReadFile < LLM::Tool
+  name "read-file"
+  description "Read a file"
+  parameter :path, String, "The filename or path"
+  required %i[path]
+
+  def call(path:)
+    {contents: File.read(path)}
+  end
+end
+```
+
+#### MCP
+
+The
+[LLM::MCP](https://0x1eef.github.io/x/mruby-llm/LLM/MCP.html)
+object lets mruby-llm use tools provided by an MCP server. Those tools
+are exposed through the same runtime as local tools, so you can pass
+them to either
+[LLM::Context](https://0x1eef.github.io/x/mruby-llm/LLM/Context.html)
+or
+[LLM::Agent](https://0x1eef.github.io/x/mruby-llm/LLM/Agent.html):
+
+```ruby
+llm = LLM.openai(key: ENV["OPENAI_SECRET"])
+mcp = LLM::MCP.stdio(argv: ["ruby", "server.rb"])
+
+mcp.run do
+  ctx = LLM::Context.new(llm, stream: $stdout, tools: mcp.tools)
+  ctx.talk("Use the available tools to inspect the environment.")
+  ctx.talk(ctx.call(:functions)) until ctx.functions.empty?
+end
+```
+
+#### Skills
+
+Skills are reusable instructions loaded from a `SKILL.md` directory.
+They let you package behavior and tool access together, and they plug
+into the same runtime as tools, agents, and MCP:
+
+```yaml
+---
+name: release
+description: Prepare a release
+tools: ["read-file"]
+---
+
+## Task
+
+Review the release state and summarize what changed.
+```
+
+```ruby
+class ReleaseAgent < LLM::Agent
+  model "gpt-4.1-mini"
+  skills "./skills/release"
+end
 ```
 
 ## Integration

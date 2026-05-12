@@ -1,32 +1,29 @@
 name: mruby-llm
 
 on:
+  pull_request:
   push:
+    branches:
+      - main
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "4.0"
-
-      - name: Install rake
-        run: gem install rake
-
-      - name: Install libcurl
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
-
-      - name: Clone mruby
-        run: git clone --depth 1 https://github.com/mruby/mruby.git ../mruby
-
-      - name: Run tests
-        env:
-          MRUBY: ${{ github.workspace }}/../mruby
-          CURLDIR: /usr
-        run: rake test
+    - uses: actions/checkout@v4
+      with:
+        path: mruby-llm
+    - uses: actions/checkout@v4
+      with:
+        repository: mruby/mruby
+        path: mruby
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ruby
+    - name: Install build dependencies
+      run: sudo apt-get update && sudo apt-get install -y bison libcurl4-openssl-dev
+    - name: Build and test
+      run: |
+        cd mruby-llm
+        make MRUBY_DIR=${{ github.workspace }}/mruby CURLDIR=/usr

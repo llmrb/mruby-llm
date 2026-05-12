@@ -143,7 +143,18 @@ MRuby::Build.new("app") do |conf|
 end
 ```
 
-Then build through your mruby checkout:
+For local development in this repository, use the bundled Makefile:
+
+```sh
+make
+make test
+```
+
+The Makefile expects an mruby checkout at `../mruby`. Override that with
+`MRUBY_DIR=/absolute/path/to/mruby` if needed.
+
+For direct integration into another mruby build, build through your mruby
+checkout:
 
 ```sh
 ruby minirake MRUBY_CONFIG=/absolute/path/to/build_config.rb
@@ -151,7 +162,9 @@ ruby minirake MRUBY_CONFIG=/absolute/path/to/build_config.rb
 
 Dependencies are declared in [mrbgem.rake](mrbgem.rake). In practice the
 main external build requirement is `libcurl`, because the runtime depends on
-`mruby-curl` and `mruby-http`.
+`mruby-curl` and `mruby-http`. The local build also expects curl headers and
+libraries under `/usr/local` by default; override with
+`CURLDIR=/absolute/path`.
 
 ## Dependencies
 

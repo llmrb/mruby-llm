@@ -165,6 +165,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
   ].map { File.expand_path(_1, __dir__) }
 
   if ENV["ENV"] == "TEST"
+    spec.add_dependency 'mruby-minitest', github: '0x1eef/mruby-minitest', branch: "main"
     spec.rbfiles.concat Dir[File.expand_path("spec/lib/**/*.rb", __dir__)].sort
   end
 

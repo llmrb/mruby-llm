@@ -20,7 +20,7 @@ improve each other and code continues to flow both ways.
 There is support for OpenAI, Anthropic, Google Gemini, DeepSeek, xAI, Z.ai,
 Ollama, and llama.cpp. The mruby port keeps the same overall execution
 model as llm.rb, but adapts it to mruby constraints. There's still quite
-a lot of the original llm.rb runtime that is supported though. 
+a lot of the original llm.rb runtime that is supported though.
 
 ## Quick start
 

@@ -403,6 +403,13 @@ module LLM
     end
 
     ##
+    # @return [LLM::Stream, #<<]
+    #  Returns a stream object
+    def stream
+      @stream || @params[:stream]
+    end
+
+    ##
     # Returns the model a Context is actively using
     # @return [String]
     def model
@@ -485,10 +492,6 @@ module LLM
     def queue
       return @queue if @queue
       stream.queue if LLM::Stream === stream
-    end
-
-    def stream
-      @stream || @params[:stream]
     end
 
     def load_skills(skills)

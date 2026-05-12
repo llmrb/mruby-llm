@@ -3,7 +3,7 @@
 </p>
 <p align="center">
   <a href="https://opensource.org/license/0bsd"><img src="https://img.shields.io/badge/License-0BSD-orange.svg?" alt="License"></a>
-  <a href="https://github.com/llmrb/llm.rb/tags"><img src="https://img.shields.io/badge/version-8.0.0-green.svg?" alt="Version"></a>
+  <a href="https://github.com/llmrb/llm.rb/tags"><img src="https://img.shields.io/badge/version-0.1.0.beta-green.svg?" alt="Version"></a>
 </p>
 
 ## About

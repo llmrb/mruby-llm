@@ -125,6 +125,78 @@ class ReleaseAgent < LLM::Agent
 end
 ```
 
+#### LLM::Stream
+
+The
+[LLM::Stream](https://0x1eef.github.io/x/llm.rb/LLM/Stream.html)
+object lets you observe output and runtime events as they happen. You
+can subclass it to handle streamed content in your own application:
+
+```ruby
+require "llm"
+
+class Stream < LLM::Stream
+  def on_content(content)
+    $stdout << content
+  end
+end
+
+llm = LLM.openai(key: ENV["KEY"])
+ctx = LLM::Context.new(llm, stream: Stream.new)
+ctx.talk "Write a haiku about Ruby."
+```
+
+#### LLM::Stream (advanced)
+
+The
+[LLM::Stream](https://0x1eef.github.io/x/llm.rb/LLM/Stream.html)
+object can also resolve tool calls while output is still streaming. In
+`on_tool_call`, you can spawn the tool, push the work onto the stream
+queue, and later drain it with `wait`:
+
+```ruby
+require "llm"
+
+class Stream < LLM::Stream
+  def on_content(content)
+    $stdout << content
+  end
+
+  def on_tool_call(tool, error)
+    return queue << error if error
+    queue << ctx.spawn(tool, :thread)
+  end
+end
+
+llm = LLM.openai(key: ENV["KEY"])
+ctx = LLM::Context.new(llm, stream: Stream.new, tools: [ReadFile])
+ctx.talk "Read README.md and summarize the quick start."
+ctx.talk(ctx.wait) while ctx.functions?
+
+
+#### Serialization
+
+The [`LLM::Context`](https://0x1eef.github.io/x/llm.rb/LLM/Context.html)
+object can be serialized to JSON, which makes it suitable for storing
+in a file, a database column, or a Redis queue. The built-in
+ActiveRecord and Sequel plugins are built on top of this feature:
+
+```ruby
+require "llm"
+
+llm = LLM.openai(key: ENV["KEY"])
+
+# Serialize a context
+ctx1 = LLM::Context.new(llm)
+ctx1.talk "Remember that my favorite language is Ruby"
+string = ctx1.to_json
+
+# Restore a context (from JSON)
+ctx2 = LLM::Context.new(llm, stream: $stdout)
+ctx2.restore(string:)
+ctx2.talk "What is my favorite language?"
+```
+
 ## Integration
 
 Add to your mruby build config:

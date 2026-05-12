@@ -172,7 +172,7 @@ llm = LLM.openai(key: ENV["KEY"])
 ctx = LLM::Context.new(llm, stream: Stream.new, tools: [ReadFile])
 ctx.talk "Read README.md and summarize the quick start."
 ctx.talk(ctx.wait) while ctx.functions?
-
+```
 
 #### Serialization
 

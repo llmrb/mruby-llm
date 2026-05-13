@@ -81,9 +81,9 @@ describe "LLM::OpenAI::StreamParser" do
       parser.parse!(second_chunk)
     end
 
-    let(:call) { stream.calls.fetch(0) }
-    let(:fn) { call.fetch(0) }
-    let(:error) { call.fetch(1) }
+    let(:call) { stream.calls[0] }
+    let(:fn) { call[0] }
+    let(:error) { call[1] }
 
     it "emits a function with the completed arguments" do
       expect(fn.id).must_equal "call_1"
@@ -98,6 +98,45 @@ describe "LLM::OpenAI::StreamParser" do
 
     it "emits an in-band tool-not-found error" do
       expect(error).must_equal(id: "call_1", name: "missing", value: {error: true})
+    end
+  end
+
+  context "when streamed tool chunks omit explicit indexes" do
+    let(:first_chunk) do
+      {"choices" => [{
+        "index" => 0,
+        "delta" => {"tool_calls" => [
+          {
+            "id" => "call_1",
+            "function" => {"name" => "missing", "arguments" => +"{\"command\""}
+          }
+        ]}
+      }]}
+    end
+
+    let(:second_chunk) do
+      {"choices" => [{
+        "index" => 0,
+        "delta" => {"tool_calls" => [
+          {
+            "function" => {"arguments" => +":\"date\"}"}
+          }
+        ]}
+      }]}
+    end
+
+    before do
+      parser.parse!(first_chunk)
+      parser.parse!(second_chunk)
+    end
+
+    let(:call) { stream.calls[0] }
+    let(:fn) { call[0] }
+
+    it "falls back to the chunk order when merging tool deltas" do
+      expect(fn.id).must_equal "call_1"
+      expect(fn.name).must_equal "missing"
+      expect(fn.arguments).must_equal({"command" => "date"})
     end
   end
 end

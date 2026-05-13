@@ -247,7 +247,6 @@ Declared mrbgem dependencies include:
 - `mruby-json`
 - `mruby-stringio`
 - `mruby-process`
-- `mruby-enumerator`
 - `mruby-io`
 - `mruby-time`
 - `mruby-env`

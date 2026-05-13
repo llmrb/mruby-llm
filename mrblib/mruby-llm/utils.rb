@@ -59,4 +59,19 @@ module LLM::Utils
     parts << chunk
     parts
   end
+
+  ##
+  # Remove trailing occurrences of a literal suffix.
+  # @param [String] value
+  #  The input string
+  # @param [String] suffix
+  #  The literal suffix to trim
+  # @return [String]
+  def rstrip(value, suffix)
+    return value if suffix.empty?
+    while value.length > suffix.length && value.end_with?(suffix)
+      value = value[0, value.length - suffix.length]
+    end
+    value
+  end
 end

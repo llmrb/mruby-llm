@@ -302,7 +302,7 @@ class LLM::Provider
     path = path.to_s.strip
     return "" if path.empty? || path == "/"
     path = "/#{path}" unless path.start_with?("/")
-    path.sub(%r{/+\z}, "")
+    LLM::Utils.rstrip(path, "/")
   end
 
   attr_reader :host, :port, :timeout, :ssl, :transport

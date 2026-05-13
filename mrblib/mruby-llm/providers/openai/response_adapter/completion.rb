@@ -5,7 +5,8 @@ module LLM::OpenAI::ResponseAdapter
     ##
     # (see LLM::Contract::Completion#messages)
     def messages
-      body.choices.map.with_index do |choice, index|
+      result = []
+      (body.choices || []).each_with_index do |choice, index|
         message = choice.message
         extra = {
           index:, response: self,
@@ -14,8 +15,9 @@ module LLM::OpenAI::ResponseAdapter
           tool_calls: adapt_tool_calls(message.tool_calls),
           original_tool_calls: message.tool_calls
         }
-        LLM::Message.new(message.role, message.content, extra)
+        result << LLM::Message.new(message.role, message.content, extra)
       end
+      result
     end
     alias_method :choices, :messages
 

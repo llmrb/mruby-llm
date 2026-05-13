@@ -29,7 +29,6 @@
 #     end
 #   end
 class LLM::Function
-
   extend LLM::Function::Registry
   prepend LLM::Function::Tracing
 
@@ -302,7 +301,10 @@ class LLM::Function
     runner = self.runner
     kwargs = LLM::Hash.try_convert(arguments) || arguments
     kwargs = kwargs.transform_keys(&:to_sym) if Hash === kwargs
-    Return.new(id, name, runner.call(**kwargs))
+    # mruby quirk
+    # **kwargs => given 0 arguments, expected 0
+    value = Hash === kwargs && kwargs.empty? ? runner.call : runner.call(**kwargs)
+    Return.new(id, name, value)
   rescue => ex
     Return.new(id, name,  {error: true, type: ex.class.name, message: ex.message})
   end

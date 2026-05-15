@@ -38,6 +38,45 @@ describe "LLM::Tool::Param" do
     end
   end
 
+  context "when given Array[...] as the param type" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "man-search"
+        description "Search the manual pages for keyword(s)"
+        parameter :keywords, Array[String], "One or more keywords to search for"
+      end
+    end
+
+    let(:keywords_param) { tool.function.params.properties[:keywords] }
+
+    it "builds an array param with the nested item type" do
+      expect(keywords_param).must_be_instance_of LLM::Schema::Array
+      expect(keywords_param.to_h[:items]).must_equal LLM::Schema.new.string
+    end
+  end
+
+  context "when given a mixed Array[...] param type" do
+    let(:tool) do
+      Class.new(LLM::Tool) do
+        name "mixed-array"
+        description "Accepts mixed array values"
+        parameter :values, Array[String, Integer], "Mixed values"
+      end
+    end
+
+    let(:values_param) { tool.function.params.properties[:values] }
+
+    it "builds an array param" do
+      expect(values_param).must_be_instance_of LLM::Schema::Array
+    end
+
+    it "builds anyOf items" do
+      expect(values_param.to_h[:items]).must_equal(
+        LLM::Schema.new.any_of(LLM::Schema.new.string, LLM::Schema.new.integer)
+      )
+    end
+  end
+
   context "when using parameter as an alias of param" do
     let(:tool) do
       Class.new(LLM::Tool) do

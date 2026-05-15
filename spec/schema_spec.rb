@@ -36,6 +36,36 @@ describe "LLM::Schema" do
     end
   end
 
+  context "when given a mixed Array[...] property type" do
+    let(:schema) do
+      Class.new(LLM::Schema) do
+        property :values, Array[String, Integer], "mixed values", required: true
+      end
+    end
+
+    context "when reading the values property" do
+      let(:values) { schema.object["values"] }
+
+      it "builds an array property" do
+        expect(values).must_be_instance_of LLM::Schema::Array
+      end
+
+      it "preserves the description" do
+        expect(values.description).must_equal "mixed values"
+      end
+
+      it "marks the property as required" do
+        expect(values.required?).must_equal true
+      end
+
+      it "builds anyOf items" do
+        expect(values.to_h[:items]).must_equal(
+          LLM::Schema.new.any_of(LLM::Schema.new.string, LLM::Schema.new.integer)
+        )
+      end
+    end
+  end
+
   context "when given nested schema classes" do
     let(:address_schema) do
       Class.new(LLM::Schema) do

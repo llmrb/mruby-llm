@@ -108,7 +108,7 @@ class LLM::Anthropic
     end
 
     def resolve_tool(tool)
-      registered = @stream.find_tool(tool["name"])
+      registered = @stream.__find__(tool["name"])
       fn = (registered || LLM::Function.new(tool["name"])).dup.tap do |fn|
         fn.id = tool["id"]
         fn.arguments = LLM::Anthropic.parse_tool_input(tool["input"])

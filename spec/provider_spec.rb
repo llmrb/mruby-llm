@@ -41,6 +41,23 @@ describe "LLM::Provider" do
       expect(provider.send(:path, "/chat/completions")).must_equal "/chat/completions"
     end
   end
+
+  context "#key?" do
+    it "returns false when the key is nil" do
+      provider = provider_class.new(key: nil, host: "example.com", transport:)
+      expect(provider.key?).must_equal false
+    end
+
+    it "returns false when the key is blank" do
+      provider = provider_class.new(key: "   ", host: "example.com", transport:)
+      expect(provider.key?).must_equal false
+    end
+
+    it "returns true when the key is set" do
+      provider = provider_class.new(key: "sk-12345", host: "example.com", transport:)
+      expect(provider.key?).must_equal true
+    end
+  end
 end
 
 Minitest.run(ARGV) || exit(1)

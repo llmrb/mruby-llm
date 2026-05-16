@@ -164,19 +164,16 @@ module LLM
     # @option params [LLM::Tracer, Proc, nil] :tracer Optional tracer override for this agent instance
     # @option params [Symbol, nil] :concurrency Defaults to the agent class concurrency
     def initialize(llm, params = {})
-      defaults = {
-        model: self.class.model,
-        tools: self.class.tools,
-        skills: self.class.skills,
-        schema: self.class.schema
-      }.compact
       @concurrency = params.delete(:concurrency) || self.class.concurrency
       @llm = llm
-      tracer = params.key?(:tracer) ? params.delete(:tracer) : self.class.tracer
-      stream = params.key?(:stream) ? params.delete(:stream) : self.class.stream
-      @tracer = resolve_option(tracer) unless tracer.nil?
-      params[:stream] = resolve_option(stream) unless stream.nil?
-      @ctx = LLM::Context.new(llm, defaults.merge(guard: true).merge(params))
+      fields = %i[model skills schema tracer stream tools]
+      fields.each do |field|
+        resolvable = params.key?(field) ? params.delete(field) : self.class.public_send(field)
+        resolved = resolve_option(resolvable) unless resolvable.nil?
+        params[field] ||= resolved unless resolved.nil? || field == :tracer
+        @tracer = resolved if field == :tracer
+      end
+      @ctx = LLM::Context.new(llm, {guard: true}.merge(params))
     end
 
     ##
@@ -343,6 +340,13 @@ module LLM
     # @return [Integer]
     def context_window
       @ctx.context_window
+    end
+
+    ##
+    # @see LLM::Context#params
+    # @return [Hash]
+    def params
+      @ctx.params
     end
 
     ##

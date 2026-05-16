@@ -62,6 +62,99 @@ describe "LLM::Agent" do
       expect(default_stream.string).must_equal ""
     end
   end
+
+  context "when configured with class-level defaults for context params" do
+    let(:schema) do
+      Class.new(LLM::Schema) do
+        property :name, LLM::Schema::String, "name", required: true
+      end
+    end
+    let(:tool) { LLM::Function.new("echo") }
+    let(:skill_dir) { File.join(root, "skills", "temp-skill") }
+    let(:agent_class) do
+      configured_schema = schema
+      configured_tool = tool
+      configured_skill_dir = skill_dir
+      Class.new(LLM::Agent) do
+        model "gpt-4.1-mini"
+        schema configured_schema
+        tools configured_tool
+        skills configured_skill_dir
+      end
+    end
+    let(:agent) { agent_class.new(llm) }
+
+    it "applies the class-level model" do
+      expect(agent.model).must_equal "gpt-4.1-mini"
+    end
+
+    it "applies the class-level schema" do
+      expect(agent.params[:schema]).must_equal schema
+    end
+
+    it "applies the class-level tools and skills" do
+      expect(agent.params[:tools].map(&:name)).must_equal ["echo", "temp-skill"]
+    end
+  end
+
+  context "when given proc overrides at initialization" do
+    let(:default_tool) { LLM::Function.new("default-tool") }
+    let(:override_tool) { LLM::Function.new("override-tool") }
+    let(:default_schema) do
+      Class.new(LLM::Schema) do
+        property :value, LLM::Schema::String, "value", required: true
+      end
+    end
+    let(:override_schema) do
+      Class.new(LLM::Schema) do
+        property :count, LLM::Schema::Integer, "count", required: true
+      end
+    end
+    let(:default_tracer) { Object.new }
+    let(:override_tracer) { Object.new }
+    let(:skill_dir) { File.join(root, "skills", "override-skill") }
+    let(:agent_class) do
+      configured_schema = default_schema
+      configured_tracer = default_tracer
+      configured_tool = default_tool
+      Class.new(LLM::Agent) do
+        model "gpt-4.1-mini"
+        schema configured_schema
+        tracer configured_tracer
+        tools configured_tool
+      end
+    end
+    let(:agent) do
+      configured_schema = override_schema
+      configured_tracer = override_tracer
+      configured_tool = override_tool
+      configured_skill_dir = skill_dir
+      agent_class.new(
+        llm,
+        model: proc { "gpt-4.1" },
+        schema: proc { configured_schema },
+        tracer: proc { configured_tracer },
+        tools: proc { [configured_tool] },
+        skills: proc { configured_skill_dir }
+      )
+    end
+
+    it "resolves the model override proc" do
+      expect(agent.model).must_equal "gpt-4.1"
+    end
+
+    it "resolves the schema override proc" do
+      expect(agent.params[:schema]).must_equal override_schema
+    end
+
+    it "resolves the tracer override proc" do
+      expect(agent.tracer).must_equal override_tracer
+    end
+
+    it "resolves the tools and skills override procs" do
+      expect(agent.params[:tools].map(&:name)).must_equal ["override-tool", "override-skill"]
+    end
+  end
 end
 
 Minitest.run(ARGV) || exit(1)

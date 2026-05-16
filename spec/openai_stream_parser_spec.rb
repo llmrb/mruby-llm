@@ -22,10 +22,6 @@ describe "LLM::OpenAI::StreamParser" do
       def on_tool_call(fn, error)
         @calls << [fn, error]
       end
-
-      def tool_not_found(fn)
-        {id: fn.id, name: fn.name, value: {error: true}}
-      end
     end.new
   end
 
@@ -97,7 +93,10 @@ describe "LLM::OpenAI::StreamParser" do
     end
 
     it "emits an in-band tool-not-found error" do
-      expect(error).must_equal(id: "call_1", name: "missing", value: {error: true})
+      expect(error.to_h).must_equal(
+        id: "call_1", name: "missing",
+        value: {error: true, type: "LLM::NoSuchToolError", message: "tool not found"}
+      )
     end
   end
 

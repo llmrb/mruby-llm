@@ -214,6 +214,17 @@ class LLM::Function
   end
 
   ##
+  # Returns an in-band error for an unresolved function call.
+  # @return [LLM::Function::Return]
+  def unavailable
+    Return.new(id, name, {
+      error: true,
+      type: LLM::NoSuchToolError.name,
+      message: "tool not found"
+    })
+  end
+
+  ##
   # Notifies the function runner that the call was interrupted.
   # This is cooperative and only applies to runners that implement
   # `on_interrupt`.

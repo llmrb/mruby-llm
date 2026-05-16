@@ -11,6 +11,11 @@ describe "LLM::Stream" do
       fn.arguments = {"command" => "date"}
     end
   end
+  let(:tool_error) do
+    LLM::Function::Return.new("call_1", "system", {
+      error: true, type: "LLM::NoSuchToolError", message: "tool not found"
+    })
+  end
 
   describe "#on_content" do
     it "returns nil" do
@@ -38,7 +43,7 @@ describe "LLM::Stream" do
 
   describe "#on_tool_return" do
     it "returns nil" do
-      expect(stream.on_tool_return(tool, stream.tool_not_found(tool))).must_be_nil
+      expect(stream.on_tool_return(tool, tool_error)).must_be_nil
     end
   end
 
@@ -66,23 +71,9 @@ describe "LLM::Stream" do
     end
   end
 
-  describe "#tool_not_found" do
-    it "returns an in-band error" do
-      expect(stream.tool_not_found(tool).to_h).must_equal(
-        id: "call_1", name: "system",
-        value: {error: true, type: "LLM::NoSuchToolError", message: "tool not found"}
-      )
-    end
-
-    it "marks the return as an error" do
-      expect(stream.tool_not_found(tool).error?).must_equal true
-    end
-  end
-
   describe "LLM::Function::Return#error?" do
-    it "returns true for automatic error returns" do
-      result = LLM::Stream.new.tool_not_found(tool)
-      expect(result.error?).must_equal true
+    it "returns true for tool errors" do
+      expect(tool_error.error?).must_equal true
     end
 
     it "returns false for successful returns" do
@@ -102,7 +93,7 @@ describe "LLM::Stream" do
 
   describe "#wait" do
     before do
-      stream.queue << stream.tool_not_found(tool)
+      stream.queue << tool_error
     end
 
     it "forwards to the queue" do

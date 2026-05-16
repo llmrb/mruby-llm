@@ -182,20 +182,7 @@ module LLM
     def talk(prompt, params = {})
       @owner = @llm.request_owner
       compactor.compact!(prompt) if compactor.compact?(prompt)
-      if mode == :responses
-        params = @params.merge(params)
-        prompt, params = transform(prompt, params)
-        bind!(params[:stream], params[:model], params[:tools])
-        res_id = params[:store] == false ? nil : @messages.find(&:assistant?)&.response&.response_id
-        params = params.merge(previous_response_id: res_id, input: @messages.to_a).compact
-        res = @llm.responses.create(prompt, params)
-      else
-        params = params.merge(messages: @messages.to_a)
-        params = @params.merge(params)
-        prompt, params = transform(prompt, params)
-        bind!(params[:stream], params[:model], params[:tools])
-        res = @llm.complete(prompt, params)
-      end
+      prompt, params, res = mode == :responses ? respond(prompt, params) : complete(prompt, params)
       self.compacted = false
       role = params[:role] || @llm.user_role
       role = @llm.tool_role if params[:role].nil? && [*prompt].grep(LLM::Function::Return).any?
@@ -458,6 +445,29 @@ module LLM
     end
 
     private
+
+    ##
+    # Executes a turn through the Responses API.
+    # @api private
+    def respond(prompt, params)
+      params = @params.merge(params)
+      prompt, params = transform(prompt, params)
+      bind!(params[:stream], params[:model], params[:tools])
+      res_id = params[:store] == false ? nil : @messages.find(&:assistant?)&.response&.response_id
+      params = params.merge(previous_response_id: res_id, input: @messages.to_a).compact
+      [prompt, params, @llm.responses.create(prompt, params)]
+    end
+
+    ##
+    # Executes a turn through the chat completions API.
+    # @api private
+    def complete(prompt, params)
+      params = params.merge(messages: @messages.to_a)
+      params = @params.merge(params)
+      prompt, params = transform(prompt, params)
+      bind!(params[:stream], params[:model], params[:tools])
+      [prompt, params, @llm.complete(prompt, params)]
+    end
 
     def bind!(stream, model, tools)
       return unless LLM::Stream === stream

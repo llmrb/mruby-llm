@@ -48,9 +48,9 @@ module LLM
     #  The model identifier
     # @return [String, nil]
     #  Returns the current model when no argument is provided
-    def self.model(model = nil)
-      return @model if model.nil?
-      @model = model
+    def self.model(model = nil, &block)
+      return @model if model.nil? && !block
+      @model = block || model
     end
 
     ##
@@ -59,9 +59,9 @@ module LLM
     #  One or more tools
     # @return [Array<LLM::Function>]
     #  Returns the current tools when no argument is provided
-    def self.tools(*tools)
-      return @tools || [] if tools.empty?
-      @tools = tools.flatten
+    def self.tools(*tools, &block)
+      return @tools || [] if tools.empty? && !block
+      @tools = block || tools.flatten
     end
 
     ##
@@ -70,9 +70,9 @@ module LLM
     #  One or more skill directories
     # @return [Array<String>, nil]
     #  Returns the current skills when no argument is provided
-    def self.skills(*skills)
-      return @skills if skills.empty?
-      @skills = skills.flatten
+    def self.skills(*skills, &block)
+      return @skills if skills.empty? && !block
+      @skills = block || skills.flatten
     end
 
     ##
@@ -81,9 +81,9 @@ module LLM
     #  The schema
     # @return [#to_json, nil]
     #  Returns the current schema when no argument is provided
-    def self.schema(schema = nil)
-      return @schema if schema.nil?
-      @schema = schema
+    def self.schema(schema = nil, &block)
+      return @schema if schema.nil? && !block
+      @schema = block || schema
     end
 
     ##
@@ -170,8 +170,13 @@ module LLM
       fields.each do |field|
         resolvable = params.key?(field) ? params.delete(field) : self.class.public_send(field)
         resolved = resolve_option(resolvable) unless resolvable.nil?
-        params[field] ||= resolved unless resolved.nil? || fields_ivar.include?(field)
-        instance_variable_set(:"@#{field}", resolved) if fields_ivar.include?(field)
+        if field == :model
+          params[field] = resolved unless params.key?(field)
+        elsif resolved && !fields_ivar.include?(field)
+          params[field] ||= resolved
+        elsif fields_ivar.include?(field)
+          instance_variable_set(:"@#{field}", resolved)
+        end
       end
       @ctx = LLM::Context.new(llm, {guard: true}.merge(params))
     end

@@ -164,14 +164,14 @@ module LLM
     # @option params [LLM::Tracer, Proc, nil] :tracer Optional tracer override for this agent instance
     # @option params [Symbol, nil] :concurrency Defaults to the agent class concurrency
     def initialize(llm, params = {})
-      @concurrency = params.delete(:concurrency) || self.class.concurrency
       @llm = llm
-      fields = %i[model skills schema tracer stream tools]
+      fields = %i[model skills schema tracer stream tools concurrency instructions]
+      fields_ivar = %i[tracer concurrency instructions]
       fields.each do |field|
         resolvable = params.key?(field) ? params.delete(field) : self.class.public_send(field)
         resolved = resolve_option(resolvable) unless resolvable.nil?
-        params[field] ||= resolved unless resolved.nil? || field == :tracer
-        @tracer = resolved if field == :tracer
+        params[field] ||= resolved unless resolved.nil? || fields_ivar.include?(field)
+        instance_variable_set(:"@#{field}", resolved) if fields_ivar.include?(field)
       end
       @ctx = LLM::Context.new(llm, {guard: true}.merge(params))
     end
@@ -390,15 +390,14 @@ module LLM
     ##
     # @return [LLM::Prompt]
     def apply_instructions(new_prompt)
-      instr = self.class.instructions
-      return new_prompt unless instr
+      return new_prompt unless @instructions
       if LLM::Prompt === new_prompt
-        new_prompt.system(instr) if inject_instructions?(new_prompt)
+        new_prompt.system(@instructions) if inject_instructions?(new_prompt)
         new_prompt
       else
-        prompt do
-          _1.system(instr) if inject_instructions?
-          _1.user(new_prompt)
+        prompt do |p|
+          p.system(@instructions) if inject_instructions?
+          p.user(new_prompt)
         end
       end
     end

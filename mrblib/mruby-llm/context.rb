@@ -447,6 +447,54 @@ module LLM
     private
 
     ##
+    # Binds runtime metadata onto an active stream.
+    # @api private
+    def bind!(stream, model, tools)
+      return unless LLM::Stream === stream
+      @stream = stream
+      stream.extra[:ctx] = self
+      stream.extra[:tracer] = tracer
+      stream.extra[:model] = model
+      stream.extra[:tools] = tools
+    end
+
+    ##
+    # Returns the bound stream queue, if available.
+    # @api private
+    def queue
+      return @queue if @queue
+      stream.queue if LLM::Stream === stream
+    end
+
+    ##
+    # Loads skill directories and adapts them into tools.
+    # @api private
+    def load_skills(skills)
+      [*skills].map { LLM::Skill.load(_1).to_tool(self) }
+    end
+
+    ##
+    # Builds in-band guarded returns when the guard blocks tool work.
+    # @api private
+    def guarded_returns
+      warning = guard&.call(self)
+      return unless warning
+      functions.map { guarded_return_for(_1, warning) }
+    end
+
+    ##
+    # Rewrites a prompt and params through the configured transformer.
+    # @api private
+    def transform(prompt, params)
+      return [prompt, params] unless transformer
+      stream = params[:stream]
+      stream.on_transform(self, transformer) if LLM::Stream === stream
+      transformer.call(self, prompt, params)
+    ensure
+      stream.on_transform_finish(self, transformer) if LLM::Stream === stream
+    end
+
+    ##
     # Executes a turn through the Responses API.
     # @api private
     def respond(prompt, params)
@@ -469,39 +517,9 @@ module LLM
       [prompt, params, @llm.complete(prompt, params)]
     end
 
-    def bind!(stream, model, tools)
-      return unless LLM::Stream === stream
-      @stream = stream
-      stream.extra[:ctx] = self
-      stream.extra[:tracer] = tracer
-      stream.extra[:model] = model
-      stream.extra[:tools] = tools
-    end
-
-    def queue
-      return @queue if @queue
-      stream.queue if LLM::Stream === stream
-    end
-
-    def load_skills(skills)
-      [*skills].map { LLM::Skill.load(_1).to_tool(self) }
-    end
-
-    def guarded_returns
-      warning = guard&.call(self)
-      return unless warning
-      functions.map { guarded_return_for(_1, warning) }
-    end
-
-    def transform(prompt, params)
-      return [prompt, params] unless transformer
-      stream = params[:stream]
-      stream.on_transform(self, transformer) if LLM::Stream === stream
-      transformer.call(self, prompt, params)
-    ensure
-      stream.on_transform_finish(self, transformer) if LLM::Stream === stream
-    end
-
+    ##
+    # Builds one guarded tool return for a blocked function call.
+    # @api private
     def guarded_return_for(function, warning)
       LLM::Function::Return.new(function.id, function.name, {
         error: true,

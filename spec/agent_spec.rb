@@ -63,6 +63,14 @@ describe "LLM::Agent" do
       end
     end
 
+    context "when no model is configured" do
+      let(:agent) { LLM::Agent.new(llm) }
+
+      it "keeps the provider default model" do
+        expect(agent.model).must_equal "gpt-4.1"
+      end
+    end
+
     context "when tools are declared with a block" do
       let(:agent_class) do
         configured_tool = tool

@@ -150,6 +150,19 @@ module LLM
     end
 
     ##
+    # Set or get the tool names that require confirmation before they can run.
+    #
+    # @param [String, Symbol, Array<String, Symbol>, Proc] tool_names
+    #  One or more tool names.
+    # @param [Proc] block
+    #  An optional, lazy-evaluated Proc
+    # @return [Array<String>, Proc, nil]
+    def self.confirm(*tool_names, &block)
+      return @confirm if tool_names.empty? && !block
+      @confirm = block || tool_names.flatten.map(&:to_s)
+    end
+
+    ##
     # @param [LLM::Provider] provider
     #  A provider
     # @param [Hash] params
@@ -165,12 +178,13 @@ module LLM
     # @option params [Symbol, nil] :concurrency Defaults to the agent class concurrency
     def initialize(llm, params = {})
       @llm = llm
-      fields = %i[model skills schema tracer stream tools concurrency instructions]
-      fields_ivar = %i[tracer concurrency instructions]
+      fields = %i[model skills schema tracer stream tools concurrency instructions confirm]
+      fields_ivar = %i[tracer concurrency instructions confirm]
       fields.each do |field|
         resolvable = params.key?(field) ? params.delete(field) : self.class.public_send(field)
-        resolve_symbol = !%i[concurrency].include?(field)
+        resolve_symbol = !%i[concurrency confirm].include?(field)
         resolved = resolvable != nil ? resolve_option(self, resolvable, resolve_symbol:) : resolvable
+        resolved = [*resolved].map(&:to_s) if field == :confirm && resolved
         if field == :model
           params[field] = resolved unless resolved.nil? || params.key?(field)
         elsif resolved && !fields_ivar.include?(field)
@@ -370,6 +384,21 @@ module LLM
     end
     alias_method :restore, :deserialize
 
+    ##
+    # This method is called when confirmation is required before a tool can run.
+    #
+    # @param [LLM::Function] fn
+    #  The pending function call. It can be cancelled through the
+    #  {LLM::Function#cancel} method.
+    # @param [Symbol, Array<Symbol>] strategy
+    #  The execution strategy that would be used for the tool call.
+    # @return [LLM::Function::Return]
+    #  Return either `fn.spawn(strategy).wait` to approve execution or
+    #  `fn.cancel(...)` to cancel the call.
+    def on_tool_confirmation(fn, strategy)
+      fn.cancel
+    end
+
     private
 
     ##
@@ -400,6 +429,18 @@ module LLM
     end
 
     ##
+    # @return [Array<LLM::Function::Return>]
+    def call_functions
+      strategy = concurrency || :call
+      return @ctx.wait(:call) unless @confirm&.any?
+      confirmables = @ctx.functions.select { @confirm.include?(_1.name.to_s) }
+      results = confirmables.map do |tool|
+        on_tool_confirmation(tool, strategy)
+      end
+      @ctx.functions? ? [*results, *@ctx.wait(:call)] : results
+    end
+
+    ##
     # Runs the tool loop
     # @api private
     def run_loop(prompt, params)
@@ -413,11 +454,11 @@ module LLM
           if max
             max.times do
               break unless @ctx.functions?
-              res = @ctx.talk(@ctx.wait(:call), params)
+              res = @ctx.talk(call_functions, params)
             end
             res = @ctx.talk(@ctx.functions.map(&:rate_limit), params) if @ctx.functions?
           else
-            res = @ctx.talk(@ctx.wait(:call), params)
+            res = @ctx.talk(call_functions, params)
           end
         end
         res

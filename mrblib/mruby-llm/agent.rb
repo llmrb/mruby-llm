@@ -169,7 +169,8 @@ module LLM
       fields_ivar = %i[tracer concurrency instructions]
       fields.each do |field|
         resolvable = params.key?(field) ? params.delete(field) : self.class.public_send(field)
-        resolved = LLM::Utils.resolve_option(self, resolvable) unless resolvable.nil?
+        resolve_symbol = !%i[concurrency].include?(field)
+        resolved = resolvable != nil ? resolve_option(self, resolvable, resolve_symbol:) : resolvable
         if field == :model
           params[field] = resolved unless params.key?(field)
         elsif resolved && !fields_ivar.include?(field)
@@ -398,12 +399,15 @@ module LLM
       !prompt.to_a.any?(&:system?)
     end
 
+    ##
+    # Runs the tool loop
+    # @api private
     def run_loop(prompt, params)
       run = proc do
         max = params.key?(:tool_attempts) ? params.delete(:tool_attempts) : 25
         max = Integer(max) if max
         stream = params[:stream] || @ctx.params[:stream]
-        stream.extra[:concurrency] = :call if LLM::Stream === stream
+        stream.extra[:concurrency] = concurrency if LLM::Stream === stream
         res = @ctx.talk(apply_instructions(prompt), params)
         while @ctx.functions?
           if max
@@ -411,7 +415,7 @@ module LLM
               break unless @ctx.functions?
               res = @ctx.talk(@ctx.wait(:call), params)
             end
-            res = @ctx.talk(@ctx.functions.map { rate_limit(_1) }, params) if @ctx.functions?
+            res = @ctx.talk(@ctx.functions.map(&:rate_limit), params) if @ctx.functions?
           else
             res = @ctx.talk(@ctx.wait(:call), params)
           end
@@ -422,12 +426,10 @@ module LLM
       @llm.with_tracer(@tracer, &run)
     end
 
-    def rate_limit(function)
-      LLM::Function::Return.new(function.id, function.name, {
-        error: true,
-        type: LLM::ToolLoopError.name,
-        message: "tool loop rate limit reached"
-      })
+    ##
+    # @api private
+    def resolve_option(...)
+      LLM::Utils.resolve_option(...)
     end
   end
 end

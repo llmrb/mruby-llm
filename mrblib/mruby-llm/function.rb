@@ -214,6 +214,17 @@ class LLM::Function
   end
 
   ##
+  # Returns an in-band error for a tool loop rate limit.
+  # @return [LLM::Function::Return]
+  def rate_limit
+    LLM::Function::Return.new(id, name, {
+      error: true,
+      type: LLM::ToolLoopError.name,
+      message: "tool loop rate limit reached"
+    })
+  end
+
+  ##
   # Returns an in-band error for an unresolved function call.
   # @return [LLM::Function::Return]
   def unavailable

@@ -6,6 +6,25 @@ module LLM::Utils
   extend self
 
   ##
+  # Resolves a configured option against an object instance.
+  #
+  # Proc values are evaluated with `instance_exec`, symbol values are
+  # sent to the object as method calls, hashes are duplicated, and all
+  # other values are returned as-is.
+  #
+  # @param [Object] obj
+  # @param [Object] option
+  # @return [Object]
+  def resolve_option(obj, option)
+    case option
+    when Proc then obj.instance_exec(&option)
+    when Symbol then obj.send(option)
+    when Hash then option.dup
+    else option
+    end
+  end
+
+  ##
   # Deep-serialize a runtime value into plain JSON-serializable data.
   #
   # Arrays and Hashes are traversed recursively. Objects that respond to

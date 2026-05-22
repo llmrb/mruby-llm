@@ -9,13 +9,15 @@ class LLM::Transport
     attr_reader :parser
 
     ##
-    # @param [#parse!, #body] parser
+    # @param [#parse!, #body, nil] parser
+    # @yieldparam [Hash] chunk
     # @return [LLM::Transport::StreamDecoder]
-    def initialize(parser)
+    def initialize(parser = nil, &on_chunk)
       @buffer = +""
       @cursor = 0
       @data = []
       @parser = parser
+      @on_chunk = on_chunk
     end
 
     ##
@@ -78,7 +80,8 @@ class LLM::Transport
     def decode!(payload)
       return if payload.empty? || payload == "[DONE]"
       chunk = LLM.json.load(payload)
-      parser.parse!(chunk) if chunk
+      return unless chunk
+      parser ? parser.parse!(chunk) : @on_chunk&.call(chunk)
     rescue *LLM::JSON::Errors
     end
 
@@ -99,9 +102,10 @@ class LLM::Transport
   # @private
   class Curl::StreamDecoder < StreamDecoder
     ##
-    # @param [#parse!, #body] parser
+    # @param [#parse!, #body, nil] parser
+    # @yieldparam [Hash] chunk
     # @return [LLM::Transport::Curl::StreamDecoder]
-    def initialize(parser)
+    def initialize(parser = nil, &on_chunk)
       super
       @raw = +""
       @chunk_bytes = nil

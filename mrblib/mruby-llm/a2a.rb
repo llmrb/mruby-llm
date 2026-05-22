@@ -93,7 +93,7 @@ class LLM::A2A
   # Returns the remote agent card.
   # @return [LLM::A2A::Card]
   def card
-    return @card if defined?(@card)
+    return @card if @card
     @card = LLM::A2A::Card.new(transport.get("/.well-known/agent-card.json"))
   end
   alias_method :agent_card, :card

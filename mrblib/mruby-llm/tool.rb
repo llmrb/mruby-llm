@@ -39,31 +39,54 @@ class LLM::Tool
   # @return [Class<LLM::Tool>]
   #  Returns a subclass of LLM::Tool
   def self.mcp(mcp, tool)
-    lock do
-      @mcp = true
-      klass = Class.new(LLM::Tool) do
-        name tool["name"]
-        description tool["description"]
-        params { tool["inputSchema"] || {type: "object", properties: {}} }
+    Class.new(LLM::Tool) do
+      name tool["name"]
+      description tool["description"]
+      params { tool["inputSchema"] || {type: "object", properties: {}} }
 
-        define_singleton_method(:inspect) do
-          "<LLM::Tool:0x#{object_id.to_s(16)} name=#{tool["name"]} (mcp)>"
-        end
-        singleton_class.alias_method :to_s, :inspect
-
-        define_singleton_method(:mcp?) do
-          true
-        end
-
-        define_method(:call) do |**args|
-          mcp.call_tool(tool["name"], args)
-        end
+      define_singleton_method(:inspect) do
+        "<LLM::Tool:0x#{object_id.to_s(16)} name=#{tool["name"]} (mcp)>"
       end
-      @mcp = false
-      register(klass)
-      klass
-    ensure
-      @mcp = false
+      singleton_class.alias_method :to_s, :inspect
+
+      define_singleton_method(:mcp?) do
+        true
+      end
+
+      define_method(:call) do |**args|
+        mcp.call_tool(tool["name"], args)
+      end
+    end
+  end
+
+  ##
+  # @param [LLM::A2A] a2a
+  #  The A2A client that will execute the tool call
+  # @param [LLM::A2A::Card::Skill]
+  #  An A2A tool
+  # @return [Class<LLM::Tool>]
+  #  Returns a subclass of LLM::Tool
+  def self.a2a(a2a, skill)
+    name = skill.name.gsub(" ", "-")
+    Class.new(LLM::Tool) do
+      name(name)
+      description(skill.description)
+      parameter :input, String, "The input string"
+      required %i[input]
+
+      define_singleton_method(:inspect) do
+        "<#{LLM::Utils.object_id(self)} name=#{name} (a2a)>"
+      end
+      singleton_class.alias_method :to_s, :inspect
+
+      define_singleton_method(:a2a?) do
+        true
+      end
+
+      define_method(:call) do |input:|
+        res = a2a.send_message(input)
+        {task: res}
+      end
     end
   end
 

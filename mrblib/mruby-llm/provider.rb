@@ -29,7 +29,7 @@ class LLM::Provider
     @port = port
     @timeout = timeout
     @ssl = ssl
-    @base_path = normalize_base_path(base_path)
+    @base_path = LLM::Utils.normalize_base_path(base_path)
     @headers = {"User-Agent" => "llm.rb v#{LLM::VERSION}"}
     @transport = transport || LLM::Transport::Curl.new(host:, port:, timeout:, ssl:, persistent:)
     @monitor = Monitor.new
@@ -303,13 +303,6 @@ class LLM::Provider
   def path(suffix)
     return suffix if @base_path.empty?
     "#{@base_path}#{suffix}"
-  end
-
-  def normalize_base_path(path)
-    path = path.to_s.strip
-    return "" if path.empty? || path == "/"
-    path = "/#{path}" unless path.start_with?("/")
-    LLM::Utils.rstrip(path, "/")
   end
 
   attr_reader :host, :port, :timeout, :ssl, :transport

@@ -6,7 +6,7 @@ module LLM::MCP::Transport
     def initialize(url:, headers: {}, timeout: nil, transport: nil)
       @uri = LLM::URI.parse(url)
       @headers = headers
-      @transport = resolve_transport(transport, timeout: timeout)
+      @transport = LLM::Utils.resolve_transport(@uri, transport, timeout)
       @queue = []
       @monitor = Monitor.new
       @running = false
@@ -52,18 +52,6 @@ module LLM::MCP::Transport
     private
 
     attr_reader :uri, :headers, :transport
-
-    def resolve_transport(transport, timeout:)
-      return default_transport(timeout: timeout) if transport.nil?
-      if Class === transport && transport <= LLM::Transport
-        return transport.new(host: uri.host, port: uri.port, timeout: timeout, ssl: uri.scheme == "https")
-      end
-      transport
-    end
-
-    def default_transport(timeout:)
-      LLM::Transport::Curl.new(host: uri.host, port: uri.port, timeout: timeout, ssl: uri.scheme == "https")
-    end
 
     def read(res)
       if res["content-type"].to_s.include?("text/event-stream")

@@ -6,6 +6,21 @@ module LLM::Utils
   extend self
 
   ##
+  # Normalizes an HTTP API base path.
+  #
+  # Blank paths normalize to an empty string. Non-empty paths are
+  # prefixed with a leading slash and stripped of trailing slashes.
+  #
+  # @param [String, nil] path
+  # @return [String]
+  def normalize_base_path(path)
+    path = path.to_s.strip
+    return "" if path.empty? || path == "/"
+    path = "/#{path}" unless path.start_with?("/")
+    rstrip(path, "/")
+  end
+
+  ##
   # Resolves a configured option against an object instance.
   #
   # Proc values are evaluated with `instance_exec`, symbol values are
@@ -23,6 +38,42 @@ module LLM::Utils
     when Hash then option.dup
     else option
     end
+  end
+
+  ##
+  # Resolves a transport from an optional override or returns a default.
+  #
+  # @param [URI] uri
+  # @param [LLM::Transport, Class, nil] transport
+  # @param [Integer, nil] timeout
+  # @return [LLM::Transport]
+  def resolve_transport(uri, transport, timeout)
+    return default_transport(uri, timeout) if transport.nil?
+    if Class === transport && transport <= LLM::Transport
+      transport.new(
+        host: uri.host,
+        port: uri.port,
+        timeout:,
+        ssl: uri.scheme == "https"
+      )
+    else
+      transport
+    end
+  end
+
+  ##
+  # Returns the default curl-based transport for a given URI.
+  #
+  # @param [URI] uri
+  # @param [Integer, nil] timeout
+  # @return [LLM::Transport::Curl]
+  def default_transport(uri, timeout)
+    LLM::Transport::Curl.new(
+      host: uri.host,
+      port: uri.port,
+      timeout:,
+      ssl: uri.scheme == "https"
+    )
   end
 
   ##

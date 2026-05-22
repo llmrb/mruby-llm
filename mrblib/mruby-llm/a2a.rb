@@ -44,8 +44,7 @@ class LLM::A2A
   # @param [Symbol] binding
   # @param [String] base_path
   # @param [String] protocol_version
-  def self.http(url:, headers: {}, timeout: 30, transport: nil, binding: :rest,
-                base_path: "", protocol_version: "1.0")
+  def self.http(url:, headers: {}, timeout: 30, transport: nil, binding: :rest, base_path: "", protocol_version: "1.0")
     new(
       binding:,
       base_path:,
@@ -58,22 +57,37 @@ class LLM::A2A
 
   ##
   # Builds an A2A client over HTTP+JSON/REST.
-  def self.rest(url:, headers: {}, timeout: 30, transport: nil,
-                base_path: "", protocol_version: "1.0")
-    http(url:, headers:, timeout:, transport:, binding: :rest,
-         base_path:, protocol_version:)
+  def self.rest(url:, headers: {}, timeout: 30, transport: nil, base_path: "", protocol_version: "1.0")
+    http(
+      url:,
+      headers:,
+      timeout:,
+      transport:,
+      binding: :rest,
+      base_path:,
+      protocol_version:
+    )
   end
 
   ##
   # Builds an A2A client over HTTP+JSON with JSON-RPC 2.0.
-  def self.jsonrpc(url:, headers: {}, timeout: 30, transport: nil,
-                   base_path: "", protocol_version: "1.0")
-    http(url:, headers:, timeout:, transport:, binding: :jsonrpc,
-         base_path:, protocol_version:)
+  def self.jsonrpc(url:, headers: {}, timeout: 30, transport: nil, base_path: "", protocol_version: "1.0")
+    http(
+      url:,
+      headers:,
+      timeout:,
+      transport:,
+      binding: :jsonrpc,
+      base_path:, protocol_version:
+    )
   end
 
-  ## @return [Symbol] The active protocol binding
-  attr_reader :binding
+  ##
+  # @return [Symbol]
+  #  The active protocol binding
+  def binding
+    @binding
+  end
 
   ##
   # Returns the remote agent card.

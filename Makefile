@@ -13,6 +13,7 @@ RUBY         ?= ruby
 BUILD_CONFIG  = build.rb
 BUILD_NAME    = mruby-llm
 BUILD_DIR     = $(MRUBY_DIR)/build/$(BUILD_NAME)
+REPOS_DIR     = $(MRUBY_DIR)/build/repos/$(BUILD_NAME)
 BUILD_PROFILE ?= test
 
 TOOLCHAIN_BIN   = bin/mruby bin/mrbc bin/mruby-config
@@ -46,3 +47,4 @@ clean:
 
 distclean: clean
 	rm -rf $(BUILD_DIR)
+	rm -rf $(REPOS_DIR)

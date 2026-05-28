@@ -20,7 +20,7 @@ class LLM::Transport
       @port = port
       @timeout = timeout
       @ssl = ssl
-      @curl = ::Curl.new
+      @curl = ::Curl.multi
       @curl.timeout = timeout if @curl.respond_to?(:timeout=)
       @monitor = Monitor.new
     end
@@ -76,7 +76,9 @@ class LLM::Transport
     attr_reader :host, :port, :timeout, :ssl
 
     def perform_request(request)
-      LLM::Transport::Response.from(@curl.send(request_url(request), build_http_request(request)))
+      curl_request = @curl.send(request_url(request), build_http_request(request))
+      perform_until_done(curl_request)
+      LLM::Transport::Response.from(curl_request.response)
     end
 
     def perform_streaming(request, owner, stream)
@@ -84,7 +86,7 @@ class LLM::Transport
       raw_body = +""
       decoder_class = stream.decoder == LLM::Transport::StreamDecoder ? LLM::Transport::Curl::StreamDecoder : stream.decoder
       decoder = decoder_class.new(stream.parser.new(stream.streamer))
-      raw = @curl.send(request_url(request), build_http_request(request)) do |header, chunk|
+      curl_request = @curl.send(request_url(request), build_http_request(request)) do |header, chunk|
         raise LLM::Interrupt, "request interrupted" if interrupted?(owner)
         res ||= LLM::Transport::Response.from(header)
         if res.success? && res["content-type"].to_s.include?("text/event-stream")
@@ -94,7 +96,8 @@ class LLM::Transport
           raw_body << chunk.to_s
         end
       end
-      res ||= LLM::Transport::Response.from(raw)
+      perform_until_done(curl_request, owner)
+      res ||= LLM::Transport::Response.from(curl_request.response)
       if raw_body.empty?
         body = decoder.body
         res.body = (Hash === body || Array === body) ? LLM::Object.from(body) : body
@@ -104,6 +107,15 @@ class LLM::Transport
       res
     ensure
       decoder&.free
+    end
+
+    def perform_until_done(request, owner = nil)
+      until request.done?
+        raise LLM::Interrupt, "request interrupted" if owner && interrupted?(owner)
+        @curl.perform
+        Task.pass
+      end
+      request.response
     end
 
     def build_http_request(request)

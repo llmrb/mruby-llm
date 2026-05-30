@@ -1,7 +1,9 @@
+load File.join(__dir__, 'mrblib', 'mruby-llm', 'version.rb')
+
 MRuby::Gem::Specification.new('mruby-llm') do |spec|
   spec.license = '0BSD'
   spec.authors = '0x1eef'
-  spec.version = '0.1.0.beta.3'
+  spec.version = LLM::VERSION
   spec.description = 'Ruby toolkit for multiple Large Language Models (LLMs)'
 
   spec.rbfiles = %w[
@@ -185,7 +187,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
 
   # Dependencies
   spec.add_dependency 'mruby-http',       :github => 'mattn/mruby-http'
-  spec.add_dependency 'mruby-curl',       :github => 'llmrb/mruby-curl', :branch => "v0.2.0"
+  spec.add_dependency 'mruby-curl',       :github => 'llmrb/mruby-curl', :branch => "v0.3.0"
   spec.add_dependency 'mruby-json',       :github => 'mattn/mruby-json'
   spec.add_dependency 'mruby-stringio',   :github => 'ksss/mruby-stringio'
   spec.add_dependency 'mruby-process',    :github => '0x1eef/mruby-process', :branch => "main"

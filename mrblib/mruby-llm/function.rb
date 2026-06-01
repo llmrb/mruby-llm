@@ -260,6 +260,13 @@ class LLM::Function
   end
 
   ##
+  # Returns true when this function is backed by a skill tool.
+  # @return [Boolean]
+  def skill?
+    @runner.respond_to?(:skill?) and @runner.skill?
+  end
+
+  ##
   # Returns true when a function has neither been called nor cancelled
   # @return [Boolean]
   def pending?

@@ -88,6 +88,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
     mrblib/mruby-llm/eventstream.rb
     mrblib/mruby-llm/eventhandler.rb
     mrblib/mruby-llm/tracer.rb
+    mrblib/mruby-llm/tracer/logger.rb
     mrblib/mruby-llm/tracer/null.rb
     mrblib/mruby-llm/provider.rb
     mrblib/mruby-llm/provider/transport.rb

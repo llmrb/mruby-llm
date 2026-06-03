@@ -265,14 +265,17 @@ module LLM
     #  If the stream queue already has tool work, `wait` will drain it
     #  without using this argument.
     #  Otherwise, this controls how pending functions are resolved directly.
+    # @param [Array<LLM::Function>] except
+    #  A list of functions to exclude from the wait
     # @return [Array<LLM::Function::Return>]
-    def wait(strategy)
+    def wait(strategy, except: [])
       if LLM::Stream === stream && !stream.queue.empty?
         @queue = stream.queue
         @queue.wait
       else
-        return guarded_returns if guarded_returns
-        tools = functions
+        tools  = functions - except
+        guards = guarded_returns(tools:)
+        return guards if guards
         @queue = tools.spawn(strategy)
         returns = @queue.wait
         emit_tool_returns(tools, returns)
@@ -480,10 +483,10 @@ module LLM
     ##
     # Builds in-band guarded returns when the guard blocks tool work.
     # @api private
-    def guarded_returns
+    def guarded_returns(tools:)
       warning = guard&.call(self)
       return unless warning
-      functions.map { guarded_return_for(_1, warning) }
+      tools.map { guarded_return_for(_1, warning) }
     end
 
     ##

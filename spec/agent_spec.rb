@@ -358,15 +358,18 @@ describe "LLM::Agent" do
         end.new
       end
       let(:tool) do
+        calls = self.calls
         Class.new(LLM::Tool) do
           name "system"
           parameter :command, String, "The command"
           required %i[command]
-          def call(command:)
+          define_method(:call) do |command:|
+            calls << command
             {"success" => command == "date" ? "2025-08-24" : false}
           end
         end
       end
+      let(:calls) { [] }
       let(:agent_class) do
         Class.new(LLM::Agent) do
           confirm "system"
@@ -394,6 +397,10 @@ describe "LLM::Agent" do
 
       it "emits confirmed tool returns" do
         expect(stream.returns).must_equal [["system", "system", {"success" => "2025-08-24"}]]
+      end
+
+      it "executes the confirmed tool once" do
+        expect(calls).must_equal ["date"]
       end
     end
   end

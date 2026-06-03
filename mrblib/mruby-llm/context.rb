@@ -273,7 +273,7 @@ module LLM
         @queue = stream.queue
         @queue.wait
       else
-        tools  = functions - except
+        tools  = except.empty? ? functions : functions - except
         guards = guarded_returns(tools:)
         return guards if guards
         @queue = tools.spawn(strategy)

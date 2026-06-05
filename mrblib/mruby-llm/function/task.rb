@@ -2,9 +2,8 @@
 
 class LLM::Function
   ##
-  # The {LLM::Function::Task} class wraps a single concurrent function call and
-  # provides a small, uniform interface across threads, scheduler-backed fibers,
-  # and async tasks.
+  # The {LLM::Function::Task} class wraps a single mruby-task-backed
+  # function call.
   class Task
     ##
     # @return [Object]
@@ -15,7 +14,7 @@ class LLM::Function
     attr_reader :function
 
     ##
-    # @param [Thread, Fiber, Async::Task] task
+    # @param [Task] task
     # @param [LLM::Function, nil] function
     # @return [LLM::Function::Task]
     def initialize(task, function = nil)
@@ -27,13 +26,18 @@ class LLM::Function
     # @return [Boolean]
     def alive?
       return task.alive? if task.respond_to?(:alive?)
+      return task.status != :DORMANT if LLM.task === task
       false
     end
 
     ##
     # @return [nil]
     def interrupt!
-      task.interrupt! if task.respond_to?(:interrupt!)
+      if task.respond_to?(:interrupt!)
+        task.interrupt!
+      elsif LLM.task === task
+        task.terminate
+      end
       function&.interrupt!
       nil
     end
@@ -42,11 +46,9 @@ class LLM::Function
     ##
     # @return [LLM::Function::Return]
     def wait
-      if Thread === task
-        task.value
-      elsif Fiber === task
-        fiber.alive? ? scheduler.run : nil
-        task.value
+      if LLM.task === task
+        task.join
+        normalize(task.value)
       else
         task.wait
       end
@@ -55,8 +57,10 @@ class LLM::Function
 
     private
 
-    def scheduler
-      Fiber.scheduler
+    def normalize(value)
+      return value unless Exception === value
+      return value if LLM::Function::Return === value
+      function ? function.error(value) : value
     end
   end
 end

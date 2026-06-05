@@ -18,13 +18,18 @@ class LLM::Function
 
     ##
     # Calls all functions in a collection through the mruby runtime surface.
-    # Only synchronous execution is exposed in the mruby port for now.
     #
     # @param [Symbol] strategy
-    # @return [LLM::Function::CallGroup]
+    # @return [LLM::Function::CallGroup, LLM::Function::TaskGroup]
     def spawn(strategy = :call)
-      raise ArgumentError, "Unknown strategy: #{strategy.inspect}. Expected :call" unless strategy == :call
-      CallGroup.new(self)
+      case strategy
+      when :call
+        CallGroup.new(self)
+      when :task
+        TaskGroup.new(map { |fn| LLM::Function::Task.new(::Task.new { fn.call }, fn) })
+      else
+        raise ArgumentError, "Unknown strategy: #{strategy.inspect}. Expected :call or :task"
+      end
     end
 
     ##

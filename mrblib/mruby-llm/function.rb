@@ -183,18 +183,24 @@ class LLM::Function
   # Calls the function through the mruby runtime surface.
   #
   # This is the low-level method that powers tool execution. In the mruby
-  # runtime, function concurrency strategies are intentionally not exposed yet,
-  # so spawning a function is currently equivalent to calling it directly.
+  # runtime, functions can be called directly or run through mruby-task.
   # Prefer the collection methods on {LLM::Context#functions} for most use
   # cases, such as {LLM::Function::Array#call}, {LLM::Function::Array#wait},
   # or {LLM::Function::Array#spawn}.
   #
   # @param [Symbol] strategy
-  #  The execution strategy. mruby currently supports `:call` only.
+  #  The execution strategy. mruby currently supports `:call` and `:task`.
   # @return [LLM::Function::Return, LLM::Function::Task]
   def spawn(strategy = :call)
-    raise ArgumentError, "Unknown strategy: #{strategy.inspect}. Expected :call" unless strategy == :call
-    CallTask.new(self)
+    case strategy
+    when :call
+      CallTask.new(self)
+    when :task
+      fn = self
+      LLM::Function::Task.new(::Task.new { fn.call }, fn)
+    else
+      raise ArgumentError, "Unknown strategy: #{strategy.inspect}. Expected :call or :task"
+    end
   end
 
   ##
@@ -209,6 +215,14 @@ class LLM::Function
     Return.new(id, name, {cancelled: true, reason:})
   ensure
     @cancelled = true
+  end
+
+  ##
+  # Returns an in-band error for a function exception.
+  # @param [Exception] ex
+  # @return [LLM::Function::Return]
+  def error(ex)
+    Return.new(id, name, {error: true, type: ex.class.name, message: ex.message})
   end
 
   ##
@@ -358,7 +372,7 @@ class LLM::Function
     value = Hash === kwargs && kwargs.empty? ? runner.call : runner.call(**kwargs)
     Return.new(id, name, value)
   rescue => ex
-    Return.new(id, name,  {error: true, type: ex.class.name, message: ex.message})
+    error(ex)
   end
 
   def call!

@@ -11,6 +11,14 @@ module LLM
     end
   end
 
+  def self.task
+    task? ? ::Task : nil
+  end
+
+  def self.task?
+    Object.const_defined?(:Task)
+  end
+
   def self.json
     LLM::JSON
   end

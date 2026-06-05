@@ -100,7 +100,8 @@ module LLM
     ##
     # Set or get the tool execution concurrency.
     #
-    # In the mruby runtime, the supported agent execution mode is `:call`.
+    # In the mruby runtime, the supported agent execution modes are `:call`
+    # and `:task`.
     #
     # @param [Symbol, nil] concurrency
     # @return [Symbol, nil]

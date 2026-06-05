@@ -18,8 +18,7 @@ class LLM::Function
     def initialize(fn)
       @fn = fn
       @function = fn
-      @ch = chan(:json, lock: :file)
-      @ch.nonblock!
+      @ch = chan(:json, lock: :file).tap(&:nonblock!)
       @value = nil
       @waited = false
       @pid = fork { call }
@@ -102,7 +101,7 @@ class LLM::Function
     end
 
     def pass
-      task? ? ::Task.pass : sleep(0.01)
+      ::Task.pass
     rescue Errno::EINTR
       nil
     end
@@ -114,10 +113,6 @@ class LLM::Function
       rescue Chan::WaitWritable
         pass
       end
-    end
-
-    def task?
-      Object.const_defined?(:Task) and ::Task.current
     end
   end
 end

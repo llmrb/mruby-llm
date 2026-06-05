@@ -26,7 +26,7 @@ class LLM::Function
     # @return [Boolean]
     def alive?
       return task.alive? if task.respond_to?(:alive?)
-      return task.status != :DORMANT if ::Task === task
+      return task.status != :DORMANT if task?(task)
       false
     end
 
@@ -46,7 +46,7 @@ class LLM::Function
     ##
     # @return [LLM::Function::Return]
     def wait
-      if ::Task === task
+      if task?(task)
         task.join
         normalize(task.value)
       else
@@ -61,6 +61,10 @@ class LLM::Function
       return value unless Exception === value
       return value if LLM::Function::Return === value
       function ? function.error(value) : value
+    end
+
+    def task?(task)
+      ::Task === task
     end
   end
 end

@@ -26,7 +26,7 @@ class LLM::Function
     # @return [Boolean]
     def alive?
       return task.alive? if task.respond_to?(:alive?)
-      return task.status != :DORMANT if LLM.task === task
+      return task.status != :DORMANT if ::Task === task
       false
     end
 
@@ -35,7 +35,7 @@ class LLM::Function
     def interrupt!
       if task.respond_to?(:interrupt!)
         task.interrupt!
-      elsif LLM.task === task
+      elsif ::Task === task
         task.terminate
       end
       function&.interrupt!
@@ -46,7 +46,7 @@ class LLM::Function
     ##
     # @return [LLM::Function::Return]
     def wait
-      if LLM.task === task
+      if ::Task === task
         task.join
         normalize(task.value)
       else

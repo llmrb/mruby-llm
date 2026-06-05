@@ -65,7 +65,7 @@ class LLM::Function
         pass
       end
     ensure
-      @ch.close rescue nil
+      @ch.close
     end
     alias_method :value, :wait
 
@@ -102,7 +102,7 @@ class LLM::Function
     end
 
     def pass
-      LLM.task? ? Task.pass : sleep(0.01)
+      task? ? ::Task.pass : sleep(0.01)
     rescue Errno::EINTR
       nil
     end
@@ -114,6 +114,10 @@ class LLM::Function
       rescue Chan::WaitWritable
         pass
       end
+    end
+
+    def task?
+      Object.const_defined?(:Task) and ::Task.current
     end
   end
 end

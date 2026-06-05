@@ -193,7 +193,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
   spec.add_dependency 'mruby-json',       :github => 'mattn/mruby-json'
   spec.add_dependency 'mruby-stringio',   :github => 'ksss/mruby-stringio'
   spec.add_dependency 'mruby-process',    :github => '0x1eef/mruby-process', :branch => "main"
-  spec.add_dependency 'mruby-chan',       :github => '0x1eef/mruby-chan', :branch => "v0.2.0"
+  spec.add_dependency 'mruby-chan',       :github => '0x1eef/mruby-chan', :branch => "v0.3.0"
   spec.add_dependency 'mruby-task'
   spec.add_dependency 'mruby-io'
   spec.add_dependency 'mruby-time'

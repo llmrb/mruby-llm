@@ -36,7 +36,6 @@ module LLM::Utils
     when Proc then obj.instance_exec(&option)
     when Symbol then resolve_symbol ? obj.send(option) : option
     when Hash then option.dup
-    when Array then option.map { resolve_option(obj, _1, resolve_symbol:) }
     else option
     end
   end

@@ -72,7 +72,11 @@ module LLM
     #  Returns the current skills when no argument is provided
     def self.skills(*skills, &block)
       return @skills if skills.empty? && !block
-      @skills = block || skills.flatten
+      if skills.size == 1 and skills.grep(Symbol).any?
+        @skills = skills.first
+      else
+        @skills = block || skills.flatten
+      end
     end
 
     ##
@@ -160,7 +164,11 @@ module LLM
     # @return [Array<String>, Proc, nil]
     def self.confirm(*tool_names, &block)
       return @confirm if tool_names.empty? && !block
-      @confirm = block || tool_names.flatten
+      if tool_names.size == 1 and tool_names.grep(Symbol).any?
+        @confirm = tool_names.first
+      else
+        @confirm = block || tool_names.flatten
+      end
     end
 
     ##

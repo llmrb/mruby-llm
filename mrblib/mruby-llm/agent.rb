@@ -160,7 +160,7 @@ module LLM
     # @return [Array<String>, Proc, nil]
     def self.confirm(*tool_names, &block)
       return @confirm if tool_names.empty? && !block
-      @confirm = block || tool_names.flatten.map(&:to_s)
+      @confirm = block || tool_names.flatten
     end
 
     ##
@@ -183,7 +183,7 @@ module LLM
       fields_ivar = %i[tracer concurrency instructions confirm]
       fields.each do |field|
         resolvable = params.key?(field) ? params.delete(field) : self.class.public_send(field)
-        resolve_symbol = !%i[concurrency confirm].include?(field)
+        resolve_symbol = !%i[concurrency].include?(field)
         resolved = resolvable != nil ? resolve_option(self, resolvable, resolve_symbol:) : resolvable
         resolved = [*resolved].map(&:to_s) if field == :confirm && resolved
         if field == :model

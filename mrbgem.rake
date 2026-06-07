@@ -189,7 +189,7 @@ MRuby::Gem::Specification.new('mruby-llm') do |spec|
 
   # Dependencies
   spec.add_dependency 'mruby-http',       :github => 'mattn/mruby-http'
-  spec.add_dependency 'mruby-curl',       :github => 'llmrb/mruby-curl', :branch => "v0.4.0"
+  spec.add_dependency 'mruby-curl',       :github => 'llmrb/mruby-curl', :branch => "v0.5.0.beta.1"
   spec.add_dependency 'mruby-json',       :github => 'mattn/mruby-json'
   spec.add_dependency 'mruby-stringio',   :github => 'ksss/mruby-stringio'
   spec.add_dependency 'mruby-process',    :github => '0x1eef/mruby-process', :branch => "v0.2.0"
